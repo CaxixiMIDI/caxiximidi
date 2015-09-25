@@ -24,33 +24,33 @@ int midiChannel = MIDI_CHANNEL;
 #include "CxCircularBuffer.h"
 #include "HitStateMachine.h"
 
-CxCircularBuffer AccelXBuffer(BUFFER_SIZE);
-CxCircularBuffer AccelYBuffer(BUFFER_SIZE);
-HitStateMachine HitState();
+CxCircularBuffer accelXBuffer(BUFFER_SIZE);
+CxCircularBuffer accelYBuffer(BUFFER_SIZE);
+HitStateMachine caxixiState;
 boolean bufferReady = false;
 
 //////////////CAXIXI/////////////////////////
-int AccelXSmooth[filterSamples];
-int AccelYSmooth[filterSamples];
+int accelXSmooth[filterSamples];
+int accelYSmooth[filterSamples];
 int smoothAccelX;
 int smoothAccelY;
 
-int SensorRead[6] = {0, 0, 0, 0, 0, 0};
-unsigned char SensorNote[4] = {
+int sensorRead[6] = {0, 0, 0, 0, 0, 0};
+unsigned char sensorNote[4] = {
 	SENSOR_NOTE_ADELANTE,
 	SENSOR_NOTE_ATRAS,
 	SENSOR_NOTE_ADELANTE_ROTADA,
 	SENSOR_NOTE_ATRAS_ROTADA
 };
 
-int NoteRelease[4] = {
+int noteRelease[4] = {
 	NOTE_RELEASE_ADELANTE,
 	NOTE_RELEASE_ATRAS,
 	NOTE_RELEASE_ADELANTE_ROTADA,
 	NOTE_RELEASE_ATRAS_ROTADA
 };
 
-int NoteThreshold[4] = {
+int noteThreshold[4] = {
 	NOTE_THRESHOLD_ADELANTE,
 	NOTE_THRESHOLD_ATRAS,
 	NOTE_THRESHOLD_ADELANTE_ROTADA,
@@ -58,7 +58,7 @@ int NoteThreshold[4] = {
 };
 
 // NoteOn = 5 (NoteOff)
-int NoteOn = 5;
+int noteOn = 5;
 /*
 NoteOnUp = 1
 NoteOnDown = 2
@@ -82,8 +82,8 @@ void setup() {
 	MIDI.begin(1);
 	Serial.begin(57600);
 	Wire.begin();
-	AccelXBuffer.clear();
-	AccelYBuffer.clear();
+	accelXBuffer.clear();
+	accelYBuffer.clear();
 	my3IMU.init();
 	my3IMU.acc.setFullResBit(true);
 	my3IMU.acc.setRangeSetting(16);
@@ -92,49 +92,49 @@ void setup() {
 
 void loop() {
 	my3IMU.getValues(v);
-	SensorRead[SENSOR_ACCEL_X] = (int)v[0];
-	SensorRead[SENSOR_ACCEL_Y] = (int)v[1];
+	sensorRead[SENSOR_ACCEL_X] = (int)v[0];
+	sensorRead[SENSOR_ACCEL_Y] = (int)v[1];
 	setCircularBuffer();
 	if(bufferReady || isBufferReady()){
-		event = HitState->update(AccelXBuffer, AccelYBuffer);
-		currentAccelX = SensorRead[SENSOR_ACCEL_X];
-		currentAccelY = SensorRead[SENSOR_ACCEL_Y];
+		event = caxixiState.update(&accelXBuffer, &accelYBuffer);
+		currentAccelX = sensorRead[SENSOR_ACCEL_X];
+		currentAccelY = sensorRead[SENSOR_ACCEL_Y];
 		
-		switch (NoteOn) {
+		switch (noteOn) {
 			case NotaAdelante:
 				if(noteReleaseUp()){
-					SendNoteOff(SensorNote[NotaAdelante]);
-					NoteOn = 5;
+					SendNoteOff(sensorNote[NotaAdelante]);
+					noteOn = 5;
 				}
 				break;
 			case NotaAtras:
 				if(noteReleaseDown()){
-					SendNoteOff(SensorNote[NotaAtras]);
-					NoteOn = 5;
+					SendNoteOff(sensorNote[NotaAtras]);
+					noteOn = 5;
 				}
 				break;
 			case NotaAdelanteRotada:
 				if(noteReleaseUpRotated()){
-					SendNoteOff(SensorNote[NotaAdelanteRotada]);
-					NoteOn = 5;
+					SendNoteOff(sensorNote[NotaAdelanteRotada]);
+					noteOn = 5;
 				}
 				break;
 			case NotaAtrasRotada:
 				if(noteReleaseDownRotated()){
-					SendNoteOff(SensorNote[NotaAtrasRotada]);
-					NoteOn = 5;
+					SendNoteOff(sensorNote[NotaAtrasRotada]);
+					noteOn = 5;
 				}
 				break;
 		}
 
-		if(NoteOn == 5 && event == HITEVENT_FORWARD){
-			NoteOn = NotaAdelante;
-			SendNoteOn(SensorNote[NotaAdelante]);
+		if(noteOn == 5 && event == HITEVENT_FORWARD){
+			noteOn = NotaAdelante;
+			SendNoteOn(sensorNote[NotaAdelante]);
 		}
 
-		if(NoteOn == 5 && event == HITEVENT_BACKWARD){
-			NoteOn = NotaAtras;
-			SendNoteOn(SensorNote[NotaAtras]);
+		if(noteOn == 5 && event == HITEVENT_BACKWARD){
+			noteOn = NotaAtras;
+			SendNoteOn(sensorNote[NotaAtras]);
 		}
 	}
 	delay(3);
@@ -151,15 +151,15 @@ void SendNoteOff(int note)
 }
 
 void setCircularBuffer(){
-	smoothAccelX = digitalSmooth(SensorRead[SENSOR_ACCEL_X], AccelXSmooth);
-	smoothAccelY = digitalSmooth(SensorRead[SENSOR_ACCEL_Y], AccelYSmooth);
-	AccelXBuffer.addValue(smoothAccelX);
-	AccelYBuffer.addValue(smoothAccelY);
+	smoothAccelX = digitalSmooth(sensorRead[SENSOR_ACCEL_X], accelXSmooth);
+	smoothAccelY = digitalSmooth(sensorRead[SENSOR_ACCEL_Y], accelYSmooth);
+	accelXBuffer.addValue(smoothAccelX);
+	accelYBuffer.addValue(smoothAccelY);
 }
 
 boolean isBufferReady(){
-	if(AccelXBuffer.getCount() < BUFFER_SIZE
-	|| AccelYBuffer.getCount() < BUFFER_SIZE){
+	if(accelXBuffer.getCount() < BUFFER_SIZE
+	|| accelYBuffer.getCount() < BUFFER_SIZE){
 		return false;
 	}else{
 		bufferReady = true;
@@ -172,7 +172,7 @@ boolean isBufferReady(){
 
 boolean noteReleaseUp()
 {
-	if(currentAccelX < NoteRelease[NotaAdelante]){
+	if(currentAccelX < noteRelease[NotaAdelante]){
 		return true;
 	}else{
 		return false;
@@ -181,7 +181,7 @@ boolean noteReleaseUp()
 
 boolean noteReleaseDown()
 {
-	if(currentAccelX > NoteRelease[NotaAtras]){
+	if(currentAccelX > noteRelease[NotaAtras]){
 		return true;
 	}else{
 		return false;
@@ -190,7 +190,7 @@ boolean noteReleaseDown()
 
 boolean noteReleaseUpRotated()
 {
-	if(currentAccelY < NoteRelease[NotaAdelanteRotada]){
+	if(currentAccelY < noteRelease[NotaAdelanteRotada]){
 		return true;
 	}else{
 		return false;
@@ -199,7 +199,7 @@ boolean noteReleaseUpRotated()
 
 boolean noteReleaseDownRotated()
 {
-	if(currentAccelY > NoteRelease[NotaAtrasRotada]){
+	if(currentAccelY > noteRelease[NotaAtrasRotada]){
 		return true;
 	}else{
 		return false;
@@ -261,3 +261,6 @@ int digitalSmooth(int rawIn, int *sensSmoothArray){     // "int *sensSmoothArray
 //  Serial.println(total/k);
   return total / k;    // divide by number of samples
 }
+
+
+
