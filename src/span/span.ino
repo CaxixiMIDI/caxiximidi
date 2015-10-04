@@ -20,6 +20,11 @@ struct MyMidiSettings : public midi::DefaultSettings {
 MIDI_CREATE_CUSTOM_INSTANCE(HardwareSerial, Serial, MIDI, MyMidiSettings);
 int midiChannel = MIDI_CHANNEL;
 
+/*
+CAXIXI XBee
+*/
+#include <SoftwareSerial.h>
+SoftwareSerial xbee(2, 3); // RX, TX
 
 #include "CxCircularBuffer.h"
 #include "HitStateMachine.h"
@@ -81,6 +86,7 @@ HitEvent event;
 void setup() {
 	MIDI.begin(1);
 	Serial.begin(57600);
+	xbee.begin(57600);
 	Wire.begin();
 	accelXBuffer.clear();
 	accelYBuffer.clear();
@@ -92,6 +98,7 @@ void setup() {
 
 void loop() {
 	my3IMU.getValues(v);
+        //Serial.println("Test");
 	sensorRead[SENSOR_ACCEL_X] = (int)v[0];
 	sensorRead[SENSOR_ACCEL_Y] = (int)v[1];
 	setCircularBuffer();
