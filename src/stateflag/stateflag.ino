@@ -184,7 +184,7 @@ void setAccelXForce()
 	if(currentAccelX < FORCE_THRESHOLD_BACKWARD){
 		accelXForce = FORCE_BACKWARD;
 	}
-	if(currentAccelX < FORCE_THRESHOLD_FORWARD && currentAccelX > FORCE_THRESHOLD_BACKWARD){
+	if(abs(currentAccelX) < FORCE_THRESHOLD_STILL){
 		accelXForce = FORCE_STILL;
 	}
 }
