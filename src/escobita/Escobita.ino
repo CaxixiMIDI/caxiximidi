@@ -3,8 +3,10 @@
 #include <FIMU_ITG3200.h>
 
 /*
-CAXIXI RAW
+CAXIXI XBee
 */
+#include <SoftwareSerial.h>
+SoftwareSerial xbee(2, 3); // RX, TX
 
 // Caxixi Config
 #include "CaxixiConfig.h"
@@ -27,32 +29,11 @@ MIDI_CREATE_CUSTOM_INSTANCE(HardwareSerial, Serial, MIDI, MyMidiSettings);
 #include "CxCircularBuffer.h"
 int midiChannel = MIDI_CHANNEL;
 
-
-/////////PIEZO VARIABLES////////////
-#include "microsmooth.h"
-
-unsigned char PiezoSensorNote[2] = {36, 38};          // Nota MIDI correspondiente a cada Sensor (Piezo)
-int PiezoNoteCutOff[2] = {1020,1020};                // Valor minimo para que sea considerado un "golpe" en cada Sensor (Piezo)
-int PiezoNoteRelease[6] = {800, 800};
-boolean activeNote[6] = {0,0,0,0,0,0};
-
-boolean VelocityFlag  = false;                  // Velocity ON (true) o OFF (false)
-boolean MicroSmoothFilter = false;
-boolean specialMicroSmooth = false;
-boolean SensorRaw = false;
-
-int A_AdelanteSmoothValues[PIEZO_SMOOTH_SAMPLES];  //Samples de smooth para los piezos! No son los mismo que para el accel
-int A_AtrasSmoothValues[PIEZO_SMOOTH_SAMPLES];
-
-int SensorHitAvg[2] = {0, 0};
-
-uint16_t* hA_AdelanteSmoothValues = ms_init(SGA);
 boolean debug = false;
 /////////////////////////////////////////
 
 CxCircularBuffer AccelXBuffer(BUFFER_SIZE);
 CxCircularBuffer AccelYBuffer(BUFFER_SIZE);
-CxCircularBuffer GyroXBuffer(BUFFER_SIZE);
 CxCircularBuffer CanHitBuffer(BUFFER_SIZE);
 CxCircularBuffer CanHitBufferRotated(BUFFER_SIZE);
 boolean bufferReady = false;
@@ -61,50 +42,44 @@ int samples = 0;
 int resolution = RESOLUTION;
 int iteration = 0;
 */
-int AccelXSmooth[filterSamples];
-int AccelYSmooth[filterSamples];
-int GyroXSmooth[filterSamples];
+int AccelXSmooth[SMOOTH_FILTER];
+int AccelYSmooth[SMOOTH_FILTER];
+int GyroXSmooth[SMOOTH_FILTER];
 int smoothAccelX;
 int smoothAccelY;
 int smoothGyroX;
 
 int SensorRead[6] = {0, 0, 0, 0, 0, 0};
-unsigned char SensorNote[4] = {
-	SENSOR_NOTE_ADELANTE,
-	SENSOR_NOTE_ATRAS,
-	SENSOR_NOTE_ADELANTE_ROTADA,
-	SENSOR_NOTE_ATRAS_ROTADA
+unsigned char SensorNote[5] = {
+	MIDI_NOTE_FORWARD,
+	MIDI_NOTE_BACKWARD,
+	MIDI_NOTE_HIT,
+	MIDI_NOTE_PIEZO_FRONT,
+	MIDI_NOTE_PIEZO_BACK
 };
 
-int NoteRelease[4] = {
-	NOTE_RELEASE_ADELANTE,
-	NOTE_RELEASE_ATRAS,
-	NOTE_RELEASE_ADELANTE_ROTADA,
-	NOTE_RELEASE_ATRAS_ROTADA
+int NoteRelease[5] = {
+	NOTE_RELEASE_FORWARD,
+	NOTE_RELEASE_BACKWARD,
+	NOTE_RELEASE_HIT,
+	NOTE_RELEASE_PIEZO_FRONT,
+	NOTE_RELEASE_PIEZO_BACK
 };
 
-int NoteThreshold[4] = {
-	NOTE_THRESHOLD_ADELANTE,
-	NOTE_THRESHOLD_ATRAS,
-	NOTE_THRESHOLD_ADELANTE_ROTADA,
-	NOTE_THRESHOLD_ATRAS_ROTADA
+int NoteThreshold[5] = {
+	NOTE_THRESHOLD_FORWARD,
+	NOTE_THRESHOLD_BACKWARD,
+	NOTE_THRESHOLD_HIT,
+	NOTE_THRESHOLD_PIEZO_FRONT,
+	NOTE_THRESHOLD_PIEZO_BACK
 };
 
 int canHitResolution = 5;
 int canHitDefinition = 1;
 
-// NoteOn = 5 (NoteOff)
-int NoteOn = 5;
-/*
-NoteOnUp = 1
-NoteOnDown = 2
-NoteOnUpRotated = 3
-NoteOnDownRotated = 4
-boolean NoteOnUp = false;
-boolean NoteOnDown = false;
-boolean NoteOnUpRotated = false;
-boolean NoteOnDownRotated = false;
-*/
+int NoteOn = NOTE_OFF;
+boolean piezoFrontNoteOn = false;
+boolean piezoBackNoteOn = false;
 
 float v[6];
 float angles[3];
@@ -117,7 +92,7 @@ boolean canHitRotated;
 
 int currentAccelX, currentAccelY;
 int iterationNumber;
-int hitsThreshold = HITS_THRESOLD;
+int hitsThreshold = CAN_HIT_THRESOLD;
 
 boolean debugOutput = false;
 
@@ -125,6 +100,7 @@ void setup() {
 	MIDI.begin(1);
 	Serial.begin(57600);
 	Wire.begin();
+	xbee.begin(57600);
 	CanHitBuffer.clear();
 	CanHitBufferRotated.clear();
 	initCanHitBuffer();
@@ -140,29 +116,21 @@ void setup() {
 int initialMillis;
 
 void loop() {
-  	if (SensorRaw) {
-		SensorHitAvg[A_PIEZO_ADELANTE] = readSensorRaw(A_PIEZO_ADELANTE);
-		SensorHitAvg[A_PIEZO_ATRAS] = readSensorRaw(A_PIEZO_ATRAS);			
-	} else {
-		SensorHitAvg[A_PIEZO_ADELANTE] = readSensor(A_PIEZO_ADELANTE);
-		SensorHitAvg[A_PIEZO_ATRAS] = readSensor(A_PIEZO_ATRAS);			
-	}
-	if (isReleased() && hasHit()) {
+	if(isReleased() && hasHit()) {
 		processHit();
 	}
 	iterationNumber = iterationNumber + 1;
 	//initialMillis = millis();
 	my3IMU.getAngles(angles);
 	my3IMU.getValues(v);
-	SensorRead[SENSOR_ACCEL_X] = (int)v[0];
-	SensorRead[SENSOR_ACCEL_Y] = (int)v[1];
-	SensorRead[SENSOR_ACCEL_Z] = (int)v[2];
-	SensorRead[SENSOR_GYRO_X] = (int)angles[0];
-	SensorRead[SENSOR_GYRO_Y] = (int)angles[1];
-	SensorRead[SENSOR_GYRO_Z] = (int)angles[2];
+	SensorRead[SENSORREAD_ACCEL_X] = (int)v[0];
+	SensorRead[SENSORREAD_ACCEL_Y] = (int)v[1];
+	SensorRead[SENSORREAD_PIEZO_FRONT] = readSensorRaw(SENSOR_PIEZO_FRONT_ANALOG);
+	SensorRead[SENSORREAD_PIEZO_BACK] = readSensorRaw(SENSOR_PIEZO_BACK_ANALOG);
+		
 	if(bufferReady || isBufferReady()){
-		currentAccelX = SensorRead[SENSOR_ACCEL_X];
-		currentAccelY = SensorRead[SENSOR_ACCEL_Y];
+		currentAccelX = SensorRead[SENSORREAD_ACCEL_X];
+		currentAccelY = SensorRead[SENSORREAD_ACCEL_Y];
 		prevIsUpThreshold = isUpThreshold;
 		prevIsDownThreshold = isDownThreshold;
 		prevIsUpThresholdRotated = isUpThresholdRotated;
@@ -173,65 +141,50 @@ void loop() {
 		setCanHitDown();
 		setCanHitRotated();
 		switch (NoteOn) {
-			case NotaAdelante:
+			case NOTE_FORWARD:
 				if(noteReleaseUp()){
-					SendNoteOff(SensorNote[NotaAdelante]);
+					SendNoteOff(SensorNote[NOTE_FORWARD]);
 					NoteOn = 5;
 				}
 				break;
-			case NotaAtras:
+			case NOTE_BACKWARD:
 				if(noteReleaseDown()){
-					SendNoteOff(SensorNote[NotaAtras]);
+					SendNoteOff(SensorNote[NOTE_BACKWARD]);
 					NoteOn = 5;
 				}
 				break;
-			case NotaAdelanteRotada:
+			case NOTE_HIT:
 				if(noteReleaseUpRotated()){
-					SendNoteOff(SensorNote[NotaAdelanteRotada]);
-					NoteOn = 5;
-				}
-				break;
-			case NotaAtrasRotada:
-				if(noteReleaseDownRotated()){
-					SendNoteOff(SensorNote[NotaAtrasRotada]);
+					SendNoteOff(SensorNote[NOTE_HIT]);
 					NoteOn = 5;
 				}
 				break;
 		}
 			
 		if(NoteOn == 5 && isUpThreshold && canHitUp){
-			NoteOn = NotaAdelante;
+			NoteOn = NOTE_FORWARD;
 			if(debugOutput){
 				Serial.println("HITUP");
 			}else{
-				SendNoteOn(SensorNote[NotaAdelante]);
+				SendNoteOn(SensorNote[NOTE_FORWARD]);
 			}
 		}
 			
 		if(NoteOn == 5 && isDownThreshold && canHitDown){
-			NoteOn = NotaAtras;
+			NoteOn = NOTE_BACKWARD;
 			if(debugOutput){
 				Serial.println("HITDOWN");
 			}else{
-				SendNoteOn(SensorNote[NotaAtras]);
+				SendNoteOn(SensorNote[NOTE_BACKWARD]);
 			}
 		}
 		
 		if(NoteOn == 5 && isUpThresholdRotated && canHitRotated){
-			NoteOn = NotaAdelanteRotada;
+			NoteOn = NOTE_HIT;
 			if(debugOutput){
 				Serial.println("ROTATED_HITUP");
 			}else{
-				SendNoteOn(SensorNote[NotaAdelanteRotada]);	
-			}
-		}
-
-		if(NoteOn == 5 && isDownThresholdRotated && canHitRotated){
-			NoteOn = NotaAtrasRotada;
-			if(debugOutput){
-				Serial.println("ROTATED_HITDOWN");
-			}else{
-				SendNoteOn(SensorNote[NotaAtrasRotada]);
+				SendNoteOn(SensorNote[NOTE_HIT]);	
 			}
 		}
 	}
@@ -375,14 +328,14 @@ void setThresholds()
 {
 	isUpThreshold = false;
 	isDownThreshold = false;
-	if(currentAccelX > NoteThreshold[NotaAdelante]){
+	if(currentAccelX > NoteThreshold[NOTE_FORWARD]){
 		isUpThreshold = true;
 		isDownThreshold = false;
 		return;
 	}else{
 		isUpThreshold = false;
 	}
-	if(currentAccelX < NoteThreshold[NotaAtras]){
+	if(currentAccelX < NoteThreshold[NOTE_BACKWARD]){
 		isDownThreshold = true;		
 		return;
 	}else{
@@ -392,24 +345,18 @@ void setThresholds()
 
 void setThresholdsRotated()
 {
-	if(currentAccelY > NoteThreshold[NotaAdelanteRotada]){
+	if(currentAccelY > NoteThreshold[NOTE_HIT]){
 		isUpThresholdRotated = true;
 		isDownThresholdRotated = false;
 		return;
 	}else{
 		isUpThresholdRotated = false;
 	}
-	if(currentAccelY < NoteThreshold[NotaAtrasRotada]){
-		isDownThresholdRotated = true;
-		return;
-	}else{
-		isDownThresholdRotated = false;
-	}
 }
 
 boolean noteReleaseUp()
 {
-	if(currentAccelX < NoteRelease[NotaAdelante]){
+	if(currentAccelX < NoteRelease[NOTE_FORWARD]){
 		return true;
 	}else{
 		return false;
@@ -418,7 +365,7 @@ boolean noteReleaseUp()
 
 boolean noteReleaseDown()
 {
-	if(currentAccelX > NoteRelease[NotaAtras]){
+	if(currentAccelX > NoteRelease[NOTE_BACKWARD]){
 		return true;
 	}else{
 		return false;
@@ -427,16 +374,7 @@ boolean noteReleaseDown()
 
 boolean noteReleaseUpRotated()
 {
-	if(currentAccelY < NoteRelease[NotaAdelanteRotada]){
-		return true;
-	}else{
-		return false;
-	}
-}
-
-boolean noteReleaseDownRotated()
-{
-	if(currentAccelY > NoteRelease[NotaAtrasRotada]){
+	if(currentAccelY < NoteRelease[NOTE_HIT]){
 		return true;
 	}else{
 		return false;
@@ -449,20 +387,20 @@ boolean noteReleaseDownRotated()
 
 boolean isReleased()
 {
-	if (activeNote[A_NotaAdelante]) {
-		if (SensorHitAvg[A_PIEZO_ADELANTE] < PiezoNoteRelease[A_NotaAdelante]) {
-			activeNote[A_NotaAdelante] = false;
-			MIDI.sendNoteOff(PiezoSensorNote[A_NotaAdelante],127,midiChannel);
+	if (piezoFrontNoteOn == true) {
+		if (SensorRead[SENSORREAD_PIEZO_FRONT] < NoteRelease[NOTE_PIEZO_FRONT]) {
+			piezoFrontNoteOn = false;
+			MIDI.sendNoteOff(SensorNote[NOTE_PIEZO_FRONT],127,midiChannel);
 		}
 	}
-	if (activeNote[A_NotaAtras]) {
-		if (SensorHitAvg[A_PIEZO_ATRAS] < PiezoNoteRelease[A_NotaAtras]) {
-			activeNote[A_NotaAtras] = false;
-			MIDI.sendNoteOff(PiezoSensorNote[A_NotaAtras],127,midiChannel);
+	if (piezoBackNoteOn == true) {
+		if (SensorRead[SENSORREAD_PIEZO_BACK] < NoteRelease[NOTE_PIEZO_BACK]) {
+			piezoBackNoteOn = false;
+			MIDI.sendNoteOff(SensorNote[NOTE_PIEZO_BACK],127,midiChannel);
 		}
 	}
 	
-	if (!activeNote[A_NotaAdelante] && !activeNote[A_NotaAtras]) {
+	if (!piezoFrontNoteOn && !piezoBackNoteOn) {
 		return true;
 	} else {
 		return false;
@@ -471,14 +409,12 @@ boolean isReleased()
 
 boolean hasHit()
 {
-	if (SensorHitAvg[A_PIEZO_ADELANTE] > PiezoNoteCutOff[A_NotaAdelante]) {
-		activeNote[A_NotaAdelante] = true;
-	}else if (SensorHitAvg[A_PIEZO_ATRAS] > PiezoNoteCutOff[A_NotaAtras]) {
-		activeNote[A_NotaAtras] = true;
+	if (SensorRead[SENSORREAD_PIEZO_FRONT] > NoteThreshold[NOTE_PIEZO_FRONT]) {
+		piezoFrontNoteOn = true;
+	}else if (SensorRead[SENSORREAD_PIEZO_BACK] > NoteThreshold[NOTE_PIEZO_BACK]) {
+		piezoBackNoteOn = true;
 	}
-	if (
-		activeNote[A_NotaAdelante] || activeNote[A_NotaAtras]
-	) {
+	if (piezoFrontNoteOn || piezoBackNoteOn) {
 		return true;
 	} else {
 		return false;
@@ -487,53 +423,30 @@ boolean hasHit()
 
 void processHit()
 {
-	if (activeNote[A_NotaAdelante]) {
-		MIDI.sendNoteOn(PiezoSensorNote[A_NotaAdelante],127,midiChannel);
-	}else if(activeNote[A_NotaAtras]) {
-		MIDI.sendNoteOn(PiezoSensorNote[A_NotaAtras],127,midiChannel);
+	if (piezoFrontNoteOn) {
+		MIDI.sendNoteOn(SensorNote[NOTE_PIEZO_FRONT],127,midiChannel);
+	}else if(piezoBackNoteOn) {
+		MIDI.sendNoteOn(SensorNote[NOTE_PIEZO_BACK],127,midiChannel);
 	}
 }
 
 
-int readSensorRaw (int sensor)
+int readSensorRaw(int sensor)
 {
 	int val;
 	switch (sensor) {
-    case A_PIEZO_ADELANTE:
-			val = analogRead(A_PIEZO_ADELANTE);
-      break;
-		case A_PIEZO_ATRAS:
-			val = analogRead(A_PIEZO_ATRAS);
-			break;    
- 	 }    
-	 return val;
+		case SENSOR_PIEZO_FRONT_ANALOG:
+			val = analogRead(SENSOR_PIEZO_FRONT_ANALOG);
+			break;
+		case SENSOR_PIEZO_BACK_ANALOG:
+			val = analogRead(SENSOR_PIEZO_BACK_ANALOG);
+			break;
+	}
+	return val;
 }
 
-int readSensor( int sensor)
-{
-  int valavg;
-  int val;
 
-  switch (sensor) {
-    case A_PIEZO_ADELANTE:
-			val = readSensorRaw(A_PIEZO_ADELANTE);
-			if (specialMicroSmooth) {
-				valavg = sga_filter(val, hA_AdelanteSmoothValues);
-			} else {
-				valavg = digitalSmooth(val, A_AdelanteSmoothValues);  // every sensor you use with digitalSmooth needs its own array	
-			}
-      break;
-		case A_PIEZO_ATRAS:
-			val = readSensorRaw(A_PIEZO_ATRAS);
-			if (MicroSmoothFilter) {
-			//	valavg = sga_filter(val, hA_AtrasSmoothValues);
-			} else {
-				valavg = digitalSmooth(val, A_AtrasSmoothValues);  // every sensor you use with digitalSmooth needs its own array
-			}
-			break;    
- 	 }    
-	 return valavg;
-}
+
 /////////////////////////
 /////////FILTER//////////
 /////////////////////////
@@ -541,23 +454,23 @@ int digitalSmooth(int rawIn, int *sensSmoothArray){     // "int *sensSmoothArray
   int j, k, temp, top, bottom;
   long total;
   static int i;
- // static int raw[filterSamples];
-  static int sorted[filterSamples];
+ // static int raw[SMOOTH_FILTER];
+  static int sorted[SMOOTH_FILTER];
   boolean done;
 
-  i = (i + 1) % filterSamples;    // increment counter and roll over if necc. -  % (modulo operator) rolls over variable
+  i = (i + 1) % SMOOTH_FILTER;    // increment counter and roll over if necc. -  % (modulo operator) rolls over variable
   sensSmoothArray[i] = rawIn;                 // input new data into the oldest slot
 
   // Serial.print("raw = ");
 
-  for (j=0; j<filterSamples; j++){     // transfer data array into anther array for sorting and averaging
+  for (j=0; j<SMOOTH_FILTER; j++){     // transfer data array into anther array for sorting and averaging
     sorted[j] = sensSmoothArray[j];
   }
 
   done = 0;                // flag to know when we're done sorting              
   while(done != 1){        // simple swap sort, sorts numbers from lowest to highest
     done = 1;
-    for (j = 0; j < (filterSamples - 1); j++){
+    for (j = 0; j < (SMOOTH_FILTER - 1); j++){
       if (sorted[j] > sorted[j + 1]){     // numbers are out of order - swap
         temp = sorted[j + 1];
         sorted [j+1] =  sorted[j] ;
@@ -568,7 +481,7 @@ int digitalSmooth(int rawIn, int *sensSmoothArray){     // "int *sensSmoothArray
   }
 
 /*
-  for (j = 0; j < (filterSamples); j++){    // print the array to debug
+  for (j = 0; j < (SMOOTH_FILTER); j++){    // print the array to debug
     Serial.print(sorted[j]); 
     Serial.print("   "); 
   }
@@ -576,8 +489,8 @@ int digitalSmooth(int rawIn, int *sensSmoothArray){     // "int *sensSmoothArray
 */
 
   // throw out top and bottom 15% of samples - limit to throw out at least one from top and bottom
-  bottom = max(((filterSamples * 15)  / 100), 1); 
-  top = min((((filterSamples * 85) / 100) + 1  ), (filterSamples - 1));   // the + 1 is to make up for asymmetry caused by integer rounding
+  bottom = max(((SMOOTH_FILTER * 15)  / 100), 1); 
+  top = min((((SMOOTH_FILTER * 85) / 100) + 1  ), (SMOOTH_FILTER - 1));   // the + 1 is to make up for asymmetry caused by integer rounding
   k = 0;
   total = 0;
   for ( j = bottom; j< top; j++){
@@ -592,3 +505,5 @@ int digitalSmooth(int rawIn, int *sensSmoothArray){     // "int *sensSmoothArray
 //  Serial.println(total/k);
   return total / k;    // divide by number of samples
 }
+
+
