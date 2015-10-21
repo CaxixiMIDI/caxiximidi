@@ -1,8 +1,4 @@
-// incluir librerias
-// iniciar buffer
-// funcion is buffer ready
-// funcion variacion
-// enviar cc messagge
+//Let´s XBee
 
 #include <FreeSixIMU.h>
 #include <FIMU_ADXL345.h>
@@ -12,6 +8,13 @@
 #ifdef DEBUG
 #include "DebugUtils.h"
 #endif
+
+/*
+CAXIXI XBee
+*/
+#include <SoftwareSerial.h>
+SoftwareSerial xbee(2, 3); // RX, TX
+
 
 #include "CommunicationUtils.h"
 #include "FreeSixIMU.h"
@@ -31,14 +34,13 @@ struct MyMidiSettings : public midi::DefaultSettings
 {
    //static const bool UseRunningStatus = false; // Messes with my old equipment!
    static const long DefaultSettings::BaudRate = 57600;
-
 };
-
 MIDI_CREATE_CUSTOM_INSTANCE(HardwareSerial, Serial, MIDI, MyMidiSettings);
 // MIDI_END
 
 #include "CxCircularBuffer.h"
 
+CxCircularBuffer GyroXBuffer(BUFFER_SIZE);
 CxCircularBuffer GyroYBuffer(BUFFER_SIZE);
 CxCircularBuffer GyroZBuffer(BUFFER_SIZE);
 
@@ -46,10 +48,16 @@ int samples = 0;
 int resolution = RESOLUTION;
 int iteration = 0;
 
+int GyroXSmooth[filterSamples];
+int smoothGyroX;
 int GyroYSmooth[filterSamples];
 int smoothGyroY;
 int GyroZSmooth[filterSamples];
 int smoothGyroZ;
+
+bool NoteState = true;
+int NoteThreshold = 600; //Umbral para mandar midiOn/Off
+bool Bloqueo = false;
 
 float v[6];
 float angles[3];
@@ -63,7 +71,8 @@ void setup() {
 	MIDI.begin(1);
 	Serial.begin(57600);
 	Wire.begin();
-	//pinMode(speakerPin, OUTPUT);
+	xbee.begin(57600);
+        GyroZBuffer.clear();
 	GyroYBuffer.clear();
         GyroZBuffer.clear();
 	delay(5);
@@ -72,15 +81,22 @@ void setup() {
 	my3IMU.acc.setRangeSetting(16);
 	delay(5);
 }
+
+boolean isRollingX;
+int debugGyroX,debugGyroX5,debugGyroX10;
+String debugRollingX;
+int isRollingXVariation = 1;
+
 boolean isRollingY;
 int debugGyroY,debugGyroY5,debugGyroY10;
 String debugRollingY;
-int isRollingYVariation = 5;
+int isRollingYVariation = 1;
 
 boolean isRollingZ;
 int debugGyroZ,debugGyroZ5,debugGyroZ10;
 String debugRollingZ;
-int isRollingZVariation = 5;
+int isRollingZVariation = 1;
+boolean bufferReady = false;
 
 void loop() {
         unsigned long currentMillis = millis();
@@ -97,49 +113,93 @@ void loop() {
         if(resolution - iteration == 0){
           iteration = 0;
 	  setCircularBuffer();
+          setIsRollingX();
           setIsRollingY();
           setIsRollingZ();
+          debugRollingX = ""; 
 	  debugRollingY = "";
           debugRollingZ = "";
           if(isBufferReady()){
-                debugGyroY = GyroYBuffer.getPreviousElement(1);//Y es la inclinacion para ade (+) y atras (-)
+                Notes();
+                debugGyroX = GyroXBuffer.getPreviousElement(1);//X es la inclinacion para izq (+) y der (-) YAW
+                debugGyroX5 = GyroXBuffer.getPreviousElement(5);
+                debugGyroX10 = GyroXBuffer.getPreviousElement(10);
+                debugGyroY = GyroYBuffer.getPreviousElement(1);//Y es la inclinacion para ade (+) y atras (-) PITCH
                 debugGyroY5 = GyroYBuffer.getPreviousElement(5);
                 debugGyroY10 = GyroYBuffer.getPreviousElement(10);
-                debugGyroZ = GyroZBuffer.getPreviousElement(1);//Z es la inclinacion para izq (+) y der (-)
+                debugGyroZ = GyroZBuffer.getPreviousElement(1);//Z es la inclinacion para izq (+) y der (-) ROLL
                 debugGyroZ5 = GyroZBuffer.getPreviousElement(5);
                 debugGyroZ10 = GyroZBuffer.getPreviousElement(10);
-                //Serial.print(currentMillis);
-                //Serial.print(",");
-                //Serial.print(debugGyroY10);
-                //Serial.print(",");
-                //Serial.print(debugGyroY5);
-                //Serial.print(",");
-                //Serial.print(debugGyroY);
-                //Serial.print(",");
+                /*
+                Serial.print(debugGyroX);
+                Serial.print("\t");
+                Serial.print(debugGyroY);
+                Serial.print("\t");
+                Serial.print(debugGyroZ);
+                Serial.print("\t");
+                Serial.print(angles[0]);
+                Serial.print("\t");
+                Serial.print(angles[1]);
+                Serial.print("\t");
+                Serial.println(angles[2]);
+                */
+                if(isRollingX){
+    		   processCCMX();//acá debería mandar el CCMESSAGGE, con processCCM()
+    			}
                 if(isRollingY){
-    		processCCMY();//acá debería mandar el CCMESSAGGE, con processCCM()
+    		   processCCMY();//acá debería mandar el CCMESSAGGE, con processCCM()
     			}
-                //Serial.print(debugRollingY);
-                //Serial.print(debugGyroZ10);
-                //Serial.print(",");
-                //Serial.print(debugGyroZ5);
-                //Serial.print(",");
-                //Serial.print(debugGyroZ);
                 if(isRollingZ){
-    		processCCMZ();//acá debería mandar el CCMESSAGGE, con processCCM()
-    			}
-                //Serial.print(",");
-                //Serial.print(debugRollingZ);
-                //Serial.println();
-                	}
+    		   processCCMZ();//acá debería mandar el CCMESSAGGE, con processCCM()
+    		        }
+                
+               }
 	}
-	delay(12);
+	delay(5);
+}
+
+/////////////ENVIAR nota midi//////////////
+void Notes()
+{
+  if (SensorHitAvg[SENSOR_ACCEL_Y] > NoteThreshold & (!Bloqueo)){
+      if (NoteState){
+            SendNoteOn(66);
+            NoteState = false;
+            Bloqueo = true;
+      }
+      else{
+            SendNoteOff(66);
+            NoteState = true;
+            Bloqueo = true;
+    }
+  }
+  if (SensorHitAvg[SENSOR_ACCEL_Y] < 400){
+      Bloqueo = false;
+  }
+}  
+
+void SendNoteOn(int note)
+{MIDI.sendNoteOn(note,127,midiChannel);}
+void SendNoteOff(int note)
+{MIDI.sendNoteOff(note,127,midiChannel);}
+///////////////////////////////////////////
+
+void setIsRollingX(){
+  int currentValue = GyroXBuffer.getPreviousElement(1);
+  //Eval first variation
+  int firstValue = GyroXBuffer.getPreviousElement(3);
+  int firstVariation = abs(firstValue - currentValue);
+  if(firstVariation > isRollingXVariation){
+        isRollingX = true;
+	return;
+  }else{
+    isRollingX = false; }
 }
 
 void setIsRollingY(){
   int currentValue = GyroYBuffer.getPreviousElement(1);
   //Eval first variation
-  int firstValue = GyroYBuffer.getPreviousElement(5);
+  int firstValue = GyroYBuffer.getPreviousElement(3);
   int firstVariation = abs(firstValue - currentValue);
   if(firstVariation > isRollingYVariation){
         isRollingY = true;
@@ -151,13 +211,28 @@ void setIsRollingY(){
 void setIsRollingZ(){
   int currentValue = GyroZBuffer.getPreviousElement(1);
   //Eval first variation
-  int firstValue = GyroZBuffer.getPreviousElement(5);
+  int firstValue = GyroZBuffer.getPreviousElement(3);
   int firstVariation = abs(firstValue - currentValue);
   if(firstVariation > isRollingZVariation){
         isRollingZ = true;
 	return;
   }else{
     isRollingZ = false; }
+}
+
+void processCCMX()
+{
+  	int controlvalueX;
+        int x;
+        controlvalueX = GyroXBuffer.getPreviousElement(1);
+        // acá hay que escalar los datos que tira el giro a la escala 0-127 del MIDI
+        if(controlvalueX>60){
+          controlvalueX = 60;}
+         if(controlvalueX<-60){
+          controlvalueX = -60;}        
+        x = map(controlvalueX, -50, 50, 0, 127); 
+        MIDI.sendControlChange(12,x,midiChannel);
+        //delay(2);
 }
 
 void processCCMY()
@@ -170,7 +245,7 @@ void processCCMY()
           controlvalueY = 75;}
          if(controlvalueY<-75){
           controlvalueY = -75;}        
-        y = map(controlvalueY, -75, 75, 0, 127); 
+        y = map(controlvalueY, 25, -25, 0, 127); 
         MIDI.sendControlChange(13,y,midiChannel);
         //delay(2);
 }
@@ -185,13 +260,15 @@ void processCCMZ()
         controlvalueZ = 75;}
         if(controlvalueZ<-75){
         controlvalueZ = -75;} 
-        z = map(controlvalueZ, -75, 75, 127, 0); 
-        MIDI.sendControlChange(12,z,midiChannel);
+        z = map(controlvalueZ, 25, -25, 0, 127); 
+        MIDI.sendControlChange(14,z,midiChannel);
         //delay(2);
 }
 
 void setCircularBuffer()
 {
+        smoothGyroX = digitalSmooth(SensorHitAvg[SENSOR_GYRO_X], GyroXSmooth);
+	GyroXBuffer.addValue(smoothGyroX);
 	smoothGyroY = digitalSmooth(SensorHitAvg[SENSOR_GYRO_Y], GyroYSmooth);
 	GyroYBuffer.addValue(smoothGyroY);
 	smoothGyroZ = digitalSmooth(SensorHitAvg[SENSOR_GYRO_Z], GyroZSmooth);
@@ -199,11 +276,15 @@ void setCircularBuffer()
 }
 
 boolean isBufferReady(){
-	if(GyroYBuffer.getCount() < BUFFER_SIZE){
-		return false;
+        if (bufferReady)
+                return bufferReady;
+	
+        if(GyroXBuffer.getCount() < BUFFER_SIZE || GyroYBuffer.getCount() < BUFFER_SIZE || GyroZBuffer.getCount() < BUFFER_SIZE){
+		bufferReady = false;
 	}else{
-		return true;
+                bufferReady = true;
 	}
+        return bufferReady;
 }     
 
 int readSensorRaw (int sensor)
