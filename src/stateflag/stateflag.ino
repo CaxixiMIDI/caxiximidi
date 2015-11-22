@@ -2,6 +2,13 @@
 #include <FIMU_ADXL345.h>
 #include <FIMU_ITG3200.h>
 
+
+/*
+CAXIXI XBee
+*/
+#include <SoftwareSerial.h>
+SoftwareSerial xbee(2, 3); // RX, TX
+
 // Caxixi Config
 #include "CaxixiConfig.h"
 
@@ -72,6 +79,7 @@ void setup() {
 	MIDI.begin(1);
 	Serial.begin(57600);
 	Wire.begin();
+	xbee.begin(57600);
 	accelXBuffer.clear();
 	accelYBuffer.clear();
 	delay(5);
@@ -99,25 +107,25 @@ void loop() {
 		setState();
 		switch (noteOn) {
 			case NOTE_FORWARD:
-				if(noteReleaseForward()){
-					SendNoteOff(SensorNote[NOTE_FORWARD]);
-					noteOn = NOTE_OFF;
-				}
-				break;
+			if(noteReleaseForward()){
+				SendNoteOff(SensorNote[NOTE_FORWARD]);
+				noteOn = NOTE_OFF;
+			}
+			break;
 			case NOTE_BACKWARD:
-				if(noteReleaseBackward()){
-					SendNoteOff(SensorNote[NOTE_BACKWARD]);
-					noteOn = NOTE_OFF;
-				}
-				break;
+			if(noteReleaseBackward()){
+				SendNoteOff(SensorNote[NOTE_BACKWARD]);
+				noteOn = NOTE_OFF;
+			}
+			break;
 			case NOTE_HIT:
-				if(noteReleaseHit()){
-					SendNoteOff(SensorNote[NOTE_HIT]);
-					noteOn = NOTE_OFF;
-				}
-				break;
+			if(noteReleaseHit()){
+				SendNoteOff(SensorNote[NOTE_HIT]);
+				noteOn = NOTE_OFF;
+			}
+			break;
 			default:
-				break;
+			break;
 		}
 		if(noteOn == NOTE_OFF && state == STATE_FORWARD && prevState == STATE_BACKWARD){
 			noteOn = NOTE_FORWARD;
@@ -184,7 +192,7 @@ void setAccelXForce()
 	if(currentAccelX < FORCE_THRESHOLD_BACKWARD){
 		accelXForce = FORCE_BACKWARD;
 	}
-	if(abs(currentAccelX) < FORCE_THRESHOLD_STILL){
+	if(currentAccelX < FORCE_THRESHOLD_FORWARD && currentAccelX > FORCE_THRESHOLD_BACKWARD){
 		accelXForce = FORCE_STILL;
 	}
 }
@@ -230,95 +238,57 @@ boolean noteReleaseHit()
 }
 
 int digitalSmooth(int rawIn, int *sensSmoothArray){     // "int *sensSmoothArray" passes an array to the function - the asterisk indicates the array name is a pointer
-  int j, k, temp, top, bottom;
-  long total;
-  static int i;
- // static int raw[filterSamples];
-  static int sorted[filterSamples];
-  boolean done;
+int j, k, temp, top, bottom;
+long total;
+static int i;
+// static int raw[filterSamples];
+static int sorted[filterSamples];
+boolean done;
 
-  i = (i + 1) % filterSamples;    // increment counter and roll over if necc. -  % (modulo operator) rolls over variable
-  sensSmoothArray[i] = rawIn;                 // input new data into the oldest slot
+i = (i + 1) % filterSamples;    // increment counter and roll over if necc. -  % (modulo operator) rolls over variable
+sensSmoothArray[i] = rawIn;                 // input new data into the oldest slot
 
-  // Serial.print("raw = ");
+// Serial.print("raw = ");
 
-  for (j=0; j<filterSamples; j++){     // transfer data array into anther array for sorting and averaging
-    sorted[j] = sensSmoothArray[j];
-  }
+for (j=0; j<filterSamples; j++){     // transfer data array into anther array for sorting and averaging
+	sorted[j] = sensSmoothArray[j];
+}
 
-  done = 0;                // flag to know when we're done sorting              
-  while(done != 1){        // simple swap sort, sorts numbers from lowest to highest
-    done = 1;
-    for (j = 0; j < (filterSamples - 1); j++){
-      if (sorted[j] > sorted[j + 1]){     // numbers are out of order - swap
-        temp = sorted[j + 1];
-        sorted [j+1] =  sorted[j] ;
-        sorted [j] = temp;
-        done = 0;
-      }
-    }
-  }
+done = 0;                // flag to know when we're done sorting              
+while(done != 1){        // simple swap sort, sorts numbers from lowest to highest
+	done = 1;
+	for (j = 0; j < (filterSamples - 1); j++){
+		if (sorted[j] > sorted[j + 1]){     // numbers are out of order - swap
+			temp = sorted[j + 1];
+			sorted [j+1] =  sorted[j] ;
+			sorted [j] = temp;
+			done = 0;
+		}
+	}
+}
 
 /*
-  for (j = 0; j < (filterSamples); j++){    // print the array to debug
-    Serial.print(sorted[j]); 
-    Serial.print("   "); 
-  }
-  Serial.println();
+for (j = 0; j < (filterSamples); j++){    // print the array to debug
+Serial.print(sorted[j]); 
+Serial.print("   "); 
+}
+Serial.println();
 */
 
-  // throw out top and bottom 15% of samples - limit to throw out at least one from top and bottom
-  bottom = max(((filterSamples * 15)  / 100), 1); 
-  top = min((((filterSamples * 85) / 100) + 1  ), (filterSamples - 1));   // the + 1 is to make up for asymmetry caused by integer rounding
-  k = 0;
-  total = 0;
-  for ( j = bottom; j< top; j++){
-    total += sorted[j];  // total remaining indices
-    k++; 
-    // Serial.print(sorted[j]); 
-    // Serial.print("   "); 
-  }
+// throw out top and bottom 15% of samples - limit to throw out at least one from top and bottom
+bottom = max(((filterSamples * 15)  / 100), 1); 
+top = min((((filterSamples * 85) / 100) + 1  ), (filterSamples - 1));   // the + 1 is to make up for asymmetry caused by integer rounding
+k = 0;
+total = 0;
+for ( j = bottom; j< top; j++){
+	total += sorted[j];  // total remaining indices
+	k++; 
+	// Serial.print(sorted[j]); 
+	// Serial.print("   "); 
+}
 
 //  Serial.println();
 //  Serial.print("average = ");
 //  Serial.println(total/k);
-  return total / k;    // divide by number of samples
+return total / k;    // divide by number of samples
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
