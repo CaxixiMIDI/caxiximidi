@@ -142,7 +142,7 @@ void loop() {
 			SendNoteOn(SensorNote[NOTE_HIT]);
 		}
 	}
-	delay(7);
+	delay(2);
 	//int diffMillis = millis() - initialMillis;
 	//Serial.print(diffMillis);
 	//Serial.println();
@@ -177,7 +177,8 @@ boolean isBufferReady(){
 
 void setSlopeStill()
 {
-	if(abs(currentAccelX - accelXBuffer.getPreviousElement(4)) < SLOPE_STILL_RANGE){
+	if(abs(currentAccelX - accelXBuffer.getPreviousElement(8)) < SLOPE_STILL_X_RANGE
+	&& abs(currentAccelY - accelYBuffer.getPreviousElement(8)) < SLOPE_STILL_Y_RANGE){
 		slopeStill = SLOPE_STILL_STATUS; 
 	}else{
 		slopeStill = SLOPE_MOVING_STATUS;
@@ -186,13 +187,13 @@ void setSlopeStill()
 
 void setAccelXForce()
 {
-	if(currentAccelX > FORCE_THRESHOLD_FORWARD){
+	if(currentAccelX > FORCE_THRESHOLD_FORWARD || currentAccelY > NOTE_THRESHOLD_HIT){
 		accelXForce = FORCE_FORWARD;
 	}
 	if(currentAccelX < FORCE_THRESHOLD_BACKWARD){
 		accelXForce = FORCE_BACKWARD;
 	}
-	if(currentAccelX < FORCE_THRESHOLD_FORWARD && currentAccelX > FORCE_THRESHOLD_BACKWARD){
+	if(currentAccelX < FORCE_STILL_RANGE_FORWARD && currentAccelX > FORCE_STILL_RANGE_BACKWARD){
 		accelXForce = FORCE_STILL;
 	}
 }
