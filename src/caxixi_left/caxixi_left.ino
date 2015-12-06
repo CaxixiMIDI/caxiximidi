@@ -10,7 +10,7 @@ CAXIXI XBee
 SoftwareSerial xbee(2, 3); // RX, TX
 
 // Caxixi Config
-#include "CaxixiConfig.h"
+#include <CaxixiConfig.h>
 
 #include "CommunicationUtils.h"
 #include "FreeSixIMU.h"
@@ -32,11 +32,6 @@ int smoothAccelX;
 int smoothAccelY;
 
 int SensorRead[6] = {0, 0, 0, 0, 0, 0};
-unsigned char SensorNote[3] = {
-	SENSOR_NOTE_FORWARD,
-	SENSOR_NOTE_BACKWARD,
-	SENSOR_NOTE_HIT
-};
 
 int NoteRelease[3] = {
 	NOTE_RELEASE_FORWARD,
@@ -94,39 +89,39 @@ void loop() {
 		setState();
 		switch (noteOn) {
 			case NOTE_FORWARD:
-			if(noteReleaseForward()){
-				SendNoteOff(SensorNote[NOTE_FORWARD]);
-				noteOn = NOTE_OFF;
-			}
-			break;
+				if(noteReleaseForward()){
+					SendNoteOff(CAXIXI_LEFT_FORWARD_NOTEOFF);
+					noteOn = NOTE_OFF;
+				}
+				break;
 			case NOTE_BACKWARD:
-			if(noteReleaseBackward()){
-				SendNoteOff(SensorNote[NOTE_BACKWARD]);
-				noteOn = NOTE_OFF;
-			}
-			break;
+				if(noteReleaseBackward()){
+					SendNoteOff(CAXIXI_LEFT_BACKWARD_NOTEOFF);
+					noteOn = NOTE_OFF;
+				}
+				break;
 			case NOTE_HIT:
-			if(noteReleaseHit()){
-				SendNoteOff(SensorNote[NOTE_HIT]);
-				noteOn = NOTE_OFF;
-			}
-			break;
+				if(noteReleaseHit()){
+					SendNoteOff(CAXIXI_LEFT_HIT_NOTEOFF);
+					noteOn = NOTE_OFF;
+				}
+				break;
 			default:
-			break;
+				break;
 		}
 		if(noteOn == NOTE_OFF && state == STATE_FORWARD && prevState == STATE_BACKWARD){
 			noteOn = NOTE_FORWARD;
-			SendNoteOn(SensorNote[NOTE_FORWARD]);
+			SendNoteOn(CAXIXI_LEFT_FORWARD_NOTEON);
 		}
 		
 		if(noteOn == NOTE_OFF && state == STATE_BACKWARD && prevState == STATE_FORWARD){
 			noteOn = NOTE_BACKWARD;
-			SendNoteOn(SensorNote[NOTE_BACKWARD]);
+			SendNoteOn(CAXIXI_LEFT_BACKWARD_NOTEON);
 		}
 		
 		if(noteOn == NOTE_OFF && currentAccelY > noteThresholdHit){
 			noteOn = NOTE_HIT;
-			SendNoteOn(SensorNote[NOTE_HIT]);
+			SendNoteOn(CAXIXI_LEFT_HIT_NOTEON);
 		}
 	}
 	delay(2);
@@ -135,14 +130,14 @@ void loop() {
 	//Serial.println();
 }
 
-void SendNoteOn(int note)
+void SendNoteOn(char note)
 {
-	Serial.println("A");
+	Serial.print(note);
 }
 
-void SendNoteOff(int note)
+void SendNoteOff(char note)
 {
-	Serial.println("B");
+	Serial.print(note);
 }
 
 void setCircularBuffer(){
