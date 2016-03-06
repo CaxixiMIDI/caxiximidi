@@ -6,11 +6,7 @@
 /*
 CAXIXI XBee
 */
-#include <SoftwareSerial.h>
-SoftwareSerial xbee(2, 3); // RX, TX
-
-// Caxixi Config
-#include <CaxixiConfig.h>
+#include "CaxixiConfig.h"
 
 #include "CommunicationUtils.h"
 #include "FreeSixIMU.h"
@@ -59,9 +55,8 @@ int state = STATE_STILL;
 int prevState;
 
 void setup() {
-	Serial.begin(57600);
+	Serial.begin(9600);
 	Wire.begin();
-	xbee.begin(57600);
 	accelXBuffer.clear();
 	accelYBuffer.clear();
 	delay(5);
@@ -89,25 +84,25 @@ void loop() {
 		setState();
 		switch (noteOn) {
 			case NOTE_FORWARD:
-				if(noteReleaseForward()){
-					SendNoteOff(CAXIXI_LEFT_FORWARD_NOTEOFF);
-					noteOn = NOTE_OFF;
-				}
-				break;
+			if(noteReleaseForward()){
+				SendNoteOff(CAXIXI_LEFT_FORWARD_NOTEOFF);
+				noteOn = NOTE_OFF;
+			}
+			break;
 			case NOTE_BACKWARD:
-				if(noteReleaseBackward()){
-					SendNoteOff(CAXIXI_LEFT_BACKWARD_NOTEOFF);
-					noteOn = NOTE_OFF;
-				}
-				break;
+			if(noteReleaseBackward()){
+				SendNoteOff(CAXIXI_LEFT_BACKWARD_NOTEOFF);
+				noteOn = NOTE_OFF;
+			}
+			break;
 			case NOTE_HIT:
-				if(noteReleaseHit()){
-					SendNoteOff(CAXIXI_LEFT_HIT_NOTEOFF);
-					noteOn = NOTE_OFF;
-				}
-				break;
+			if(noteReleaseHit()){
+				SendNoteOff(CAXIXI_LEFT_HIT_NOTEOFF);
+				noteOn = NOTE_OFF;
+			}
+			break;
 			default:
-				break;
+			break;
 		}
 		if(noteOn == NOTE_OFF && state == STATE_FORWARD && prevState == STATE_BACKWARD){
 			noteOn = NOTE_FORWARD;
@@ -130,14 +125,14 @@ void loop() {
 	//Serial.println();
 }
 
-void SendNoteOn(char note)
+void SendNoteOn(String note)
 {
-	Serial.print(note);
+	Serial.println("C");
 }
 
-void SendNoteOff(char note)
+void SendNoteOff(String note)
 {
-	Serial.print(note);
+	Serial.println("D");
 }
 
 void setCircularBuffer(){
