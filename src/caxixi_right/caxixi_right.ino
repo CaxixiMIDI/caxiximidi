@@ -126,12 +126,12 @@ void loop() {
 
 void SendNoteOn(String note)
 {
-	Serial.println("A");
+	Serial.println(note);
 }
 
 void SendNoteOff(String note)
 {
-	Serial.println("B");
+	Serial.println(note);
 }
 
 void setCircularBuffer(){

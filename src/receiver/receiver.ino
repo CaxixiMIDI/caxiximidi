@@ -24,10 +24,13 @@ void setup()
 void loop()
 {
 	if (XBee.available()){
-		Serial.println(XBee.read());
+		char text = XBee.read();
+		Serial.print(text);
+		Serial.print(" \n ");
 		//MIDI.sendNoteOn(XBee.read(),127,1);
 	}
 }
+
 
 /*
 
@@ -105,3 +108,4 @@ void serialEvent() {
 
 
 */
+
