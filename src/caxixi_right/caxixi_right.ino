@@ -124,14 +124,18 @@ void loop() {
 	//Serial.println();
 }
 
-void SendNoteOn(String note)
+void SendNoteOn(int note)
 {
-	Serial.println(note);
+	Serial.print("<");
+	Serial.print(note);
+	Serial.print(">");
 }
 
-void SendNoteOff(String note)
+void SendNoteOff(int note)
 {
-	Serial.println(note);
+	Serial.print("<");
+	Serial.print(note);
+	Serial.print(">");
 }
 
 void setCircularBuffer(){
@@ -269,3 +273,4 @@ for ( j = bottom; j< top; j++){
 //  Serial.println(total/k);
 return total / k;    // divide by number of samples
 }
+
