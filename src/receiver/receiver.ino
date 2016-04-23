@@ -45,10 +45,6 @@ int bufferI=0; //indice del buffer para record
 int bufferJ=0; //indice del buffer para play
 // BUTTON RECORD const & var:
 int buttonPushCounter = 0;				// counter for the number of button presses
-int buttonState = 0;							// current state of the button
-int lastButtonState = 0;					// previous state of the button
-int buttonNoteState = 0;
-int lastButtonNoteState = 0;
 int buttonUndoState = 0;
 int lastButtonUndoState = 0;
 
@@ -59,7 +55,6 @@ bool play = false;
 bool isSetT0 = false;
 bool isSetT1 = false;
 bool FirstNote = false;
-bool isSetOctavador = true;
 
 long time = 0;		//time = millis() cuenta los milisegundos desde q arranca
 long t0 = 0;			//cuando record==True, ajustamos una variable "t0" a esos msec y t = millis()-t0
@@ -70,7 +65,7 @@ long reset = 0;		//y ajustamos la variable reset = millis - t0 - t1, que en prin
 
 void setup()
 {
-	pinMode(OCTAVE_LED_PIN, OUTPUT);// initialize the LED as an output:
+	pinMode(RECORD_LED_PIN, OUTPUT);// initialize the LED as an output:
 	pinMode(OCTAVE_UP_BUTTON_PIN, INPUT);// initialize the button pin as a input:
 	pinMode(OCTAVE_DOWN_BUTTON_PIN, INPUT);
 	pinMode(SAMPLER_BUTTON_RECORD_PIN, INPUT);
@@ -109,9 +104,7 @@ void loop()
 	time = millis()-(t0 + t1 + reset);
 	setReset();
 	PlayBuffer();
-	ButtonRecord();
 	ButtonUndo();
-	Lights();// turns on the LED every two button pushes by checking the modulo of the button push counter.
 	Octavador();
 	while(XBee.available() > 0){
 		char aChar = XBee.read();
@@ -131,7 +124,11 @@ void loop()
 			inInt = atoi(inData);
 			// Use the value
 			//Serial.println(inInt);
-			if (inInt == CAXIXI_RIGHT_FORWARD_NOTEON){
+			if (inInt == CAXIXI_RECORD_START){
+				RecordStart();
+			} else if (inInt == CAXIXI_RECORD_STOP){
+				RecordStop();
+			} else if (inInt == CAXIXI_RIGHT_FORWARD_NOTEON){
 				SendNoteOn(cxRightForwardNote);
 			} else if (inInt == CAXIXI_RIGHT_FORWARD_NOTEOFF){
 				SendNoteOff(cxRightForwardNote);
@@ -251,22 +248,17 @@ void PlayBuffer() {
 	}
 }
 
-void ButtonRecord() {
-	buttonState = digitalRead(SAMPLER_BUTTON_RECORD_PIN);
-	if (buttonState != lastButtonState) {// if the state has changed, increment the counter
-		if (buttonState == HIGH) {// if the current state is HIGH then the button wend from off to on:
-			buttonPushCounter++;
-			if (record==true){
-				record=false;
-				isSetOctavador=false;
-				setT1();
-			} else {
-				record=true;
-				layer = layer + 1;
-			}
-		}
-		lastButtonState = buttonState; // save the current state as the last state, for next time through the loop
-	}
+void RecordStart() {
+	digitalWrite(RECORD_LED_PIN, HIGH);
+	// This will trigger setT0 on first Note
+	record=true;
+	layer = layer + 1;
+}
+
+void RecordStop() {
+	digitalWrite(RECORD_LED_PIN, LOW);
+	record=false;
+	setT1();
 }
 
 void Undo(Buffer a[], int i, int layer){//Hay que usar la variable global i para que solamente recorra las notas que están "escritas". Lo mismo hay que hacer en el bubblesort
@@ -295,15 +287,6 @@ void ButtonUndo()
   }
 }
 
-void Lights(){
-	// turns on the LED every two button pushes by checking the modulo of the button push counter.
-	if (buttonPushCounter % 2 == 1) {
-		digitalWrite(OCTAVE_LED_PIN, HIGH);
-	} else {
-		digitalWrite(OCTAVE_LED_PIN, LOW);
-	}
-}
-
 void Octavador(){
 	UpState = digitalRead(OCTAVE_UP_BUTTON_PIN);
 	DownState = digitalRead(OCTAVE_DOWN_BUTTON_PIN);
@@ -323,10 +306,10 @@ void Octavador(){
 			cxLeftBackwardNote = cxLeftBackwardNote+12;
 			cxLeftHitNote = cxLeftHitNote+12;
 			CurrentOctave = CurrentOctave+1; 
-			digitalWrite(OCTAVE_LED_PIN, HIGH);  
+			digitalWrite(RECORD_LED_PIN, HIGH);  
 		} else {
 			// turn LED off:
-			digitalWrite(OCTAVE_LED_PIN, LOW);
+			digitalWrite(RECORD_LED_PIN, LOW);
 		}
 		lastUpState = UpState;
 	}
@@ -346,10 +329,10 @@ void Octavador(){
 			cxLeftBackwardNote = cxLeftBackwardNote-12;
 			cxLeftHitNote = cxLeftHitNote-12;
 			CurrentOctave = CurrentOctave-1;
-			digitalWrite(OCTAVE_LED_PIN, HIGH);  
+			digitalWrite(RECORD_LED_PIN, HIGH);  
 		} else {
 			// turn LED off:
-			digitalWrite(OCTAVE_LED_PIN, LOW);
+			digitalWrite(RECORD_LED_PIN, LOW);
 		}
 		lastDownState = DownState;
 	}

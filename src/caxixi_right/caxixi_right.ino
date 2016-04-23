@@ -53,6 +53,20 @@ int accelXForce;
 int state = STATE_STILL;
 int prevState;
 
+/**
+ * 1. BUTTONS
+ */
+
+// 1.1 Sampler
+bool record = false;
+int buttonState = 0;							// current state of the button
+int lastButtonState = 0;					// previous state of the button
+
+
+
+
+
+
 void setup() {
 	Serial.begin(9600);
 	Wire.begin();
@@ -124,18 +138,31 @@ void loop() {
 	//Serial.println();
 }
 
-void SendNoteOn(int note)
+void SendToReceiver(int msg)
 {
 	Serial.print("<");
-	Serial.print(note);
+	Serial.print(msg);
 	Serial.print(">");
+}
+
+void SendNoteOn(int note)
+{
+	SendToReceiver(note);
 }
 
 void SendNoteOff(int note)
 {
-	Serial.print("<");
-	Serial.print(note);
-	Serial.print(">");
+	SendToReceiver(note);
+}
+
+void SendRecordStart()
+{
+	SendToReceiver(CAXIXI_RECORD_START);
+}
+
+void SendRecordStop()
+{
+	SendToReceiver(CAXIXI_RECORD_STOP);
 }
 
 void setCircularBuffer(){
@@ -218,6 +245,22 @@ boolean noteReleaseHit()
 	}
 }
 
+void ButtonRecord() {
+	buttonState = digitalRead(SAMPLER_BUTTON_RECORD_PIN);
+	if (buttonState != lastButtonState) {// if the state has changed, increment the counter
+		if (buttonState == HIGH) {// if the current state is HIGH then the button wend from off to on:
+			if (record==true){
+				record=false;
+				SendRecordStop();
+			} else {
+				record=true;
+				SendRecordStart();
+			}
+		}
+		lastButtonState = buttonState; // save the current state as the last state, for next time through the loop
+	}
+}
+
 int digitalSmooth(int rawIn, int *sensSmoothArray){     // "int *sensSmoothArray" passes an array to the function - the asterisk indicates the array name is a pointer
 int j, k, temp, top, bottom;
 long total;
@@ -273,4 +316,5 @@ for ( j = bottom; j< top; j++){
 //  Serial.println(total/k);
 return total / k;    // divide by number of samples
 }
+
 
