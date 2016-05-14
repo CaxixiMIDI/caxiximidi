@@ -54,6 +54,23 @@ int accelXForce;
 int state = STATE_STILL;
 int prevState;
 
+/**
+ * 1. BUTTONS
+ */
+
+// 1.1 Sampler
+bool record = false;
+int recordButtonState = 0;    // current state of the button
+int lastRecordButtonState = 0;  // previous state of the button
+int clearButtonState = 0;
+int lastClearButtonState = 0;
+
+// 1.2 Octavator
+int octaveDownButtonLastState  = 0;
+int lastDownState = 0;
+int octaveDownButtonState = 0;  // variable for reading the pushbutton status
+int currentOctave = 0;
+
 void setup() {
 	Serial.begin(9600);
 	Wire.begin();
@@ -76,6 +93,8 @@ void loop() {
 	SensorRead[SENSOR_ACCEL_Z] = (int)v[2];
 	setCircularBuffer();
 	if(bufferReady || isBufferReady()){
+	    ButtonClear();
+		ButtonOctaveDown();
 		currentAccelX = accelXBuffer.getPreviousElement(1);
 		currentAccelY = accelYBuffer.getPreviousElement(1);
 		setSlopeStill();
@@ -125,19 +144,33 @@ void loop() {
 	//Serial.println();
 }
 
+void SendToReceiver(int msg)
+{
+  Serial.print("<");
+  Serial.print(msg);
+  Serial.print(">");
+}
+
 void SendNoteOn(int note)
 {
-	Serial.print("<");
-	Serial.print(note);
-	Serial.print(">");
+  SendToReceiver(note);
 }
 
 void SendNoteOff(int note)
 {
-	Serial.print("<");
-	Serial.print(note);
-	Serial.print(">");
+  SendToReceiver(note);
 }
+
+void SendOctaveDown()
+{
+  SendToReceiver(CAXIXI_OCTAVE_DOWN);
+}
+
+void SendClear()
+{
+  SendToReceiver(CAXIXI_SAMPLER_CLEAR);
+}
+
 
 void setCircularBuffer(){
 	smoothAccelX = digitalSmooth(SensorRead[SENSOR_ACCEL_X], accelXSmooth);
@@ -217,6 +250,27 @@ boolean noteReleaseHit()
 	}else{
 		return false;
 	}
+}
+	
+void ButtonOctaveDown() {
+  octaveDownButtonState = digitalRead(OCTAVE_DOWN_BUTTON_PIN);
+  if (octaveDownButtonState != octaveDownButtonLastState) {
+    if (octaveDownButtonState == HIGH){
+      currentOctave = currentOctave-1; 
+      SendOctaveDown();
+    }
+    octaveDownButtonLastState = octaveDownButtonState;
+  }
+}
+
+void ButtonClear() {
+  clearButtonState = digitalRead(SAMPLER_BUTTON_CLEAR_PIN);
+  if (clearButtonState != lastClearButtonState) {// if the state has changed, increment the counter
+    if (clearButtonState == HIGH) {// if the current state is HIGH then the button wend from off to on:
+		SendClear();
+    }
+    lastClearButtonState = clearButtonState; // save the current state as the last state, for next time through the loop
+  }
 }
 
 int digitalSmooth(int rawIn, int *sensSmoothArray){     // "int *sensSmoothArray" passes an array to the function - the asterisk indicates the array name is a pointer
