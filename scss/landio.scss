@@ -168,6 +168,7 @@ $font-family-sans-serif-custom: 'Lato', sans-serif !default;
 .section-pricing,
 .section-text,
 .section-news,
+.section-timeline,
 .section-signup {
   padding-bottom: 2.8125rem;
 
@@ -1008,7 +1009,7 @@ figure { position: relative; }
   color: #fff;
   transform: translate(-50%, -50%);
 
-  span { font-size: 3.125rem; }
+  span { font-size: 6.125rem; }
 
   &:focus,
   &:hover {
@@ -1805,4 +1806,22 @@ $linkedin: #0077b5;
   }
 
   canvas { width: 170px; }
+}
+
+/* Fade in background */
+.link-fadeinbg {
+//	background: rgba(149,165,166,0.1);
+}
+
+.link-fadeinbg a {
+	border-bottom: 1px solid rgba(52,73,94,0.4);
+	font-weight: 500;
+	-webkit-transition: background-color 0.3s, border-color 0.3s;
+	transition: background-color 0.3s, border-color 0.3s;
+}
+
+.link-fadeinbg a:hover,
+.link-fadeinbg a:focus {
+	border-color: rgba(52,73,94,0);
+	background-color: rgba(52,73,94,0.1);
 }

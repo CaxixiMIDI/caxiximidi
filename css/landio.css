@@ -4153,6 +4153,7 @@ a.bg-danger:focus, a.bg-danger:hover {
 .section-pricing,
 .section-text,
 .section-news,
+.section-timeline,
 .section-signup {
   padding-bottom: 2.8125rem; }
   @media (min-width: 768px) {
@@ -4160,6 +4161,7 @@ a.bg-danger:focus, a.bg-danger:hover {
     .section-pricing,
     .section-text,
     .section-news,
+    .section-timeline,
     .section-signup {
       padding-bottom: 5.625rem; } }
 
@@ -4754,7 +4756,7 @@ figure {
   color: #fff;
   transform: translate(-50%, -50%); }
   .icon-play-button span {
-    font-size: 3.125rem; }
+    font-size: 6.125rem; }
   .icon-play-button:focus, .icon-play-button:hover {
     color: rgba(255, 255, 255, 0.5);
     outline: 0; }
@@ -5294,5 +5296,17 @@ figure {
     transform: translate(-50%, -50%); }
   #chart-holder canvas {
     width: 170px; }
+
+/* Fade in background */
+.link-fadeinbg a {
+  border-bottom: 1px solid rgba(52, 73, 94, 0.4);
+  font-weight: 500;
+  -webkit-transition: background-color 0.3s, border-color 0.3s;
+  transition: background-color 0.3s, border-color 0.3s; }
+
+.link-fadeinbg a:hover,
+.link-fadeinbg a:focus {
+  border-color: rgba(52, 73, 94, 0);
+  background-color: rgba(52, 73, 94, 0.1); }
 
 /*# sourceMappingURL=landio.css.map */

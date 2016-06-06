@@ -28,6 +28,9 @@
     <meta name="msapplication-config" content="img/favicon/browserconfig.xml">
     <meta name="theme-color" content="#663fb5">
     <link rel="stylesheet" href="css/landio.css">
+    <link rel="stylesheet" href="css/timeline.css">
+    <script src="js/plugins/video.js"></script>
+    <script src="js/modernizr.js"></script>
     <script>
       (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
       (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
@@ -91,7 +94,7 @@
     <!-- Intro
     ================================================== -->
 
-    <section id="caxixi" class="section-intro bg-faded text-xs-center">
+    <section id="caxixi" class="section-intro bg-faded text-xs-center link-fadeinbg">
       <div class="container">
         <h3 class="wp wp-1">Las posibilidades t&eacute;cnicas del caxixi, un instrumento de percusi&oacute;n de mano, hacia una interfaz MIDI.</h3>
         <p class="lead wp wp-2">Conservando la forma de ejecuci&oacute;n original del instrumento, basada en un simple movimiento oscilatorio del brazo y la mu&ntilde;eca, se busca expandir al m&aacute;ximo el potencial sonoro del dispositivo. El proyecto es lanzado bajo una licencia <a href="#gpllink">GPL</a> de hardware abierto.</p>
@@ -102,16 +105,16 @@
     <!-- Features
     ================================================== -->
 
-    <section class="section-features text-xs-center">
+    <section class="section-features text-xs-center link-fadeinbg">
       <div class="container">
         <div class="row">
           <div class="col-md-4">
             <div class="card">
               <div class="card-block">
                 <span class="icon-headphones display-1"></span>
-                <h4 class="card-title">Quienes</h4>
+                <h4 class="card-title">Quiénes</h4>
                 <h6 class="card-subtitle text-muted">Para vos!</h6>
-                <p class="card-text">El instrumento est&aacute; dirigido a m&uacute;sicos, DJs y performers, aunque el objetivo es que cualquier persona con intereses musicales o l&uacute;dicos puedan utilizarlo.</p>
+                <p class="card-text">El instrumento está dirigido a músicos, DJs y performers, aunque el objetivo es que cualquier persona con intereses musicales o lúdicos puedan utilizarlo.</p>
               </div>
             </div>
           </div>
@@ -144,11 +147,15 @@
 
     <section class="section-video bg-inverse text-xs-center wp wp-4">
       <h3 class="sr-only">Video</h3>
-      <video id="demo_video" class="video-js vjs-default-skin vjs-big-play-centered" controls poster="img/video-poster.jpg" data-setup='{}'>
-        <source src="http://vjs.zencdn.net/v/oceans.mp4" type='video/mp4'>
-        <source src="http://vjs.zencdn.net/v/oceans.webm" type='video/webm'>
-      </video>
+      
+      <figure class="has-light-mask">
+         <a id="youtube-trigger" class="icon-play-button" href="#" data-toggle="modal" data-target="#youtubeModal" data-video="http://www.youtube.com/embed/xjS6SftYQaQ">
+           <span class="icon-play3"></span>
+         </a>
+         <img class="img-fluid img-fluid-custom" src="img/video-poster.jpg" alt="Video poster">
+       </figure>
     </section>
+    <hr class="invisible">
 
     <!-- Testimonials
     ================================================== -->
@@ -161,7 +168,7 @@
             <div class="carousel-item active">
               <blockquote class="blockquote">
                 <img src="img/martinkondra-avatar.png" height="80" width="80" alt="Avatar" class="img-circle">
-                <p class="h3">Este proyecto me permite englobar los conocimientos que adquirí a partir de mi formación como Ingeniero Industrial, con otro mundo que me apasiona, la música. Me encanta trabajar en equipo, y mucho más en proyectos tan innovadores como este.</p>
+                <p class="h3">Este proyecto me permite englobar los conocimientos que adquirí a partir de mi formación como Ingeniero Industrial, con otro mundo que me apasiona, la música.</p>
                 <footer>Nicolas Alberto - Il Ingenieri</footer>
               </blockquote>
             </div>
@@ -224,7 +231,7 @@
           <div class="row">
             <div class="col-md-6 p-r-0">
               <figure class="has-light-mask m-b-0 image-effect">
-                <img src="https://images.unsplash.com/photo-1442328166075-47fe7153c128?q=80&fm=jpg&w=1080&fit=max" alt="Article thumbnail" class="img-fluid">
+                <img src="img/caxiximidi-network.png" alt="Caxixi MIDI GitHub Network" class="img-fluid">
               </figure>
             </div>
             <div class="col-md-6 p-l-0">
@@ -260,6 +267,183 @@
         </div>
       </div>
     </section>
+
+  	<section id="cd-timeline" class="cd-container link-fadeinbg">
+  		<div class="cd-timeline-block">
+  			<div class="cd-timeline-img cd-picture">
+  				<img src="img/cd-icon-picture.svg" alt="Picture">
+  			</div> <!-- cd-timeline-img -->
+
+  			<div class="cd-timeline-content">
+  				<h2>Nace Caxixi MIDI</h2>
+  				<p><a href="linkedin">Martin</a> (músico) tiene la idea de combinar Caxixi+MIDI y contacta a <a href="#linkedin">Nico</a> (Ingenieri) y <a href="#linkedin">Gonza</a> (Dev) para formar el equipo.</p>
+  				<span class="cd-date">Diciembre 2013</span>
+  			</div> <!-- cd-timeline-content -->
+  		</div> <!-- cd-timeline-block -->
+
+  		<div class="cd-timeline-block">
+  			<div class="cd-timeline-img cd-movie">
+  				<img src="img/cd-icon-movie.svg" alt="Movie">
+  			</div> <!-- cd-timeline-img -->
+
+  			<div class="cd-timeline-content">
+  				<h2>Primeros pasos</h2>
+  				<p>Conseguimos los primeros componentes (piezo electricos, Arduino UNO) sobre los que montaremos los inicios de Caxixi MIDI</p>
+          <div class="timaline-image-container">
+          </div>
+  				<span class="cd-date">Marzo 2014</span>
+  			</div> <!-- cd-timeline-content -->
+  		</div> <!-- cd-timeline-block -->
+
+  		<div class="cd-timeline-block">
+  			<div class="cd-timeline-img cd-picture">
+  				<img src="img/cd-icon-picture.svg" alt="Picture">
+  			</div> <!-- cd-timeline-img -->
+
+  			<div class="cd-timeline-content">
+  				<h2>Caxixi MIDI Analogico v0.1.6a</h2>
+  				<p>Version analógica, piezo eléctricos, semillas, arroz (lógica de umbrales)</p>
+          <img class="timeline-image" src="img/timeline/abril-2014.png"/>
+  				<span class="cd-date">Abril 2014</span>
+  			</div> <!-- cd-timeline-content -->
+  		</div> <!-- cd-timeline-block -->
+
+  		<div class="cd-timeline-block">
+  			<div class="cd-timeline-img cd-location">
+  				<img src="img/cd-icon-location.svg" alt="Location">
+  			</div> <!-- cd-timeline-img -->
+
+  			<div class="cd-timeline-content">
+  				<h2><a href="http://worrydream.com/SeeingSpaces/">Seeing Spaces</a></h2>
+  				<p>Utilizando Processing para ver en tiempo real como funcionan los componentes con los que estamos trabajando. Nace escobita, una nueva variente de Caxixi MIDI</p>
+          <img class="timeline-image" src="img/timeline/junio-2014.jpg"/>
+  				<span class="cd-date">Junio 2014</span>
+  			</div> <!-- cd-timeline-content -->
+  		</div> <!-- cd-timeline-block -->
+
+  		<div class="cd-timeline-block">
+  			<div class="cd-timeline-img cd-location">
+  				<img src="img/cd-icon-location.svg" alt="Location">
+  			</div> <!-- cd-timeline-img -->
+
+  			<div class="cd-timeline-content">
+  				<h2>Caxixi MIDI Digital v0.2.1b</h2>
+  				<p>Utilizando <a href="https://github.com/TinkerKit">Tinkerkit</a> nace el primer Caxixi MIDI Digital.</p>
+  				<span class="cd-date">Septiembre 2014</span>
+  			</div> <!-- cd-timeline-content -->
+  		</div> <!-- cd-timeline-block -->
+
+  		<div class="cd-timeline-block">
+  			<div class="cd-timeline-img cd-movie">
+  				<img src="img/cd-icon-movie.svg" alt="Movie">
+  			</div> <!-- cd-timeline-img -->
+
+  			<div class="cd-timeline-content">
+  				<h2>Caxixi MIDI Digital v0.3.2a</h2>
+  				<p>Abandonamos Tinkerkit en favor de nuevos componentes (accelerometro/gyroscopio <a href="https://es.wikipedia.org/wiki/Unidad_de_medici%C3%B3n_inercial">IMU</a>, <a href="http://www.digi.com/lp/xbee">XBee</a>) en la búsqueda de una version wireless.</p>
+  				<span class="cd-date">Noviembre 2014</span>
+  			</div> <!-- cd-timeline-content -->
+  		</div> <!-- cd-timeline-block -->
+      
+  		<div class="cd-timeline-block">
+  			<div class="cd-timeline-img cd-movie">
+  				<img src="img/cd-icon-movie.svg" alt="Movie">
+  			</div> <!-- cd-timeline-img -->
+
+  			<div class="cd-timeline-content">
+  				<h2>Se incorpora el Licenciado Pazos (Emi)</h2>
+  				<p>Empezamos a trabajar con un <a href="https://es.wikipedia.org/wiki/Buffer_circular">Circular Buffer</a> que agrega la dimensión temporal a nuestros cálculos.</p>
+  				<span class="cd-date">Diciembre 2014</span>
+  			</div> <!-- cd-timeline-content -->
+  		</div> <!-- cd-timeline-block -->
+      
+  		<div class="cd-timeline-block">
+  			<div class="cd-timeline-img cd-movie">
+  				<img src="img/cd-icon-movie.svg" alt="Movie">
+  			</div> <!-- cd-timeline-img -->
+  			<div class="cd-timeline-content">
+  				<h2>Museo de Arte Moderno de Buenos Aires</h2>
+  				<p>En el marco de la exposición <a href="http://agendacultural.buenosaires.gob.ar/evento/la-donacion-leon-ferrari/10411#ad-image-0">Donación León Ferrari</a> en el <a href="http://www.buenosaires.gob.ar/museoartemoderno">MAMBA</a> (Museo de Arte Moderno de Buenos Aires) los músicos <a href="https://www.facebook.com/lucas.herreraf?fref=ts">Herrera</a> – <a href="https://www.facebook.com/juancristobal.sleigh?fref=ts">Sleigh</a> (experimental y contemporánea) interpretan a León Ferrari y su obra con experiencias sonoras en vivo en la salas del Museo utilizando Caxixi MIDI</p>
+          <img class="timeline-image" src="img/timeline/julio-2015.jpg"/>
+  				<span class="cd-date">Julio 2015</span>
+  			</div> <!-- cd-timeline-content -->
+  		</div> <!-- cd-timeline-block -->
+      
+  		<div class="cd-timeline-block">
+  			<div class="cd-timeline-img cd-movie">
+  				<img src="img/cd-icon-movie.svg" alt="Movie">
+  			</div> <!-- cd-timeline-img -->
+
+  			<div class="cd-timeline-content">
+  				<h2>Caxixi MIDI Sampler</h2>
+  				<p>Se le suma al Caxixi MIDI el modulo Sampler, que permite utilizarlo como un <a href="https://es.wikipedia.org/wiki/Secuenciador">secuenciador MIDI</a>.</p>
+  				<span class="cd-date">Agosto 2015</span>
+  			</div> <!-- cd-timeline-content -->
+  		</div> <!-- cd-timeline-block -->
+      
+  		<div class="cd-timeline-block">
+  			<div class="cd-timeline-img cd-movie">
+  				<img src="img/cd-icon-movie.svg" alt="Movie">
+  			</div> <!-- cd-timeline-img -->
+
+  			<div class="cd-timeline-content">
+  				<h2>Hackathon Sonar+D</h2>
+  				<p>Obtenemos la primer mención en el Hackathon del congreso <a hreg="https://sonarbuenosaires.com/es/pg/que-es-sonar">Sónar+D</a>.</p>
+          <img class="timeline-image" src="img/timeline/noviembre-2015.jpg"/>
+  				<span class="cd-date">Noviembre 2015</span>
+  			</div> <!-- cd-timeline-content -->
+  		</div> <!-- cd-timeline-block -->
+      
+  		<div class="cd-timeline-block">
+  			<div class="cd-timeline-img cd-movie">
+  				<img src="img/cd-icon-movie.svg" alt="Movie">
+  			</div> <!-- cd-timeline-img -->
+
+  			<div class="cd-timeline-content">
+  				<h2>Caxixi MIDI Case</h2>
+  				<p>Junto con el equipo de <a href="http://tamaco.chela.org.ar/">TaMaCo</a> generamos la primer versión del Case para el Caxixi usando impresión 3D</p>
+  				<span class="cd-date">Diciembre 2015</span>
+  			</div> <!-- cd-timeline-content -->
+  		</div> <!-- cd-timeline-block -->
+      
+  		<div class="cd-timeline-block">
+  			<div class="cd-timeline-img cd-movie">
+  				<img src="img/cd-icon-movie.svg" alt="Movie">
+  			</div> <!-- cd-timeline-img -->
+
+  			<div class="cd-timeline-content">
+  				<h2><a href="https://www.eventbrite.com.ar/e/open-house-febrero-registration-22057767376">TaMaCo Open House</a></h2>
+  				<p>Participamos del evento con una pequeña demostración de las posibilidades musicales que brinda Caxixi MIDI</p>
+  				<span class="cd-date">Feb 2016</span>
+  			</div> <!-- cd-timeline-content -->
+  		</div> <!-- cd-timeline-block -->
+      
+  		<div class="cd-timeline-block">
+  			<div class="cd-timeline-img cd-movie">
+  				<img src="img/cd-icon-movie.svg" alt="Movie">
+  			</div> <!-- cd-timeline-img -->
+
+  			<div class="cd-timeline-content">
+  				<h2>Caxixi MIDI HandButton</h2>
+  				<p>Se mejora el diseño del Case, agregando los botones del Secuenciador MIDI directamente sobre el Caxixi</p>
+          <img class="timeline-image" src="img/timeline/marzo-2016.jpg"/>
+  				<span class="cd-date">Marzo 2016</span>
+  			</div> <!-- cd-timeline-content -->
+  		</div> <!-- cd-timeline-block -->
+      
+  		<div class="cd-timeline-block">
+  			<div class="cd-timeline-img cd-movie">
+  				<img src="img/cd-icon-movie.svg" alt="Movie">
+  			</div> <!-- cd-timeline-img -->
+
+  			<div class="cd-timeline-content">
+  				<h2>Presentacion Caxixi MIDI - Let it VJ</h2>
+  				<p>En el marco de <a href="https://www.facebook.com/events/493887290806052/">LET IT VJ #15</a> se presenta Caxixi MIDI</p>
+  				<span class="cd-date">Jun 2016</span>
+  			</div> <!-- cd-timeline-content -->
+  		</div> <!-- cd-timeline-block -->
+      
+  	</section> <!-- cd-timeline -->
 
     <!-- Sign Up
     ================================================== -->
@@ -307,8 +491,9 @@
                 <span class="media-object icon-logo display-1"></span>
               </div>
               <small class="media-body media-bottom">
-                &copy; Caxixi Midi 2016. <br>
-                Designed by Peter Finlan, developed by Taty Grassini.
+                &copy; Caxixi Midi 2016. <br/>
+                Designed by Peter Finlan, developed by Taty Grassini. <br/>
+                Timeline Designed by <a target="_blank" href="https://codyhouse.co/gem/vertical-timeline/">Sebastiano Guerriero</a>
               </small>
             </div>
           </div>
@@ -325,8 +510,20 @@
         </div>
       </div>
     </footer>
-
+    
+    <!-- video modal -->
+    <div class="modal fade" id="youtubeModal" tabindex="-1" role="dialog" aria-labelledby="youtubeModal" aria-hidden="true">
+      <div class="modal-dialog modal-video" role="document">
+        <div class="modal-content">
+          <!-- 16:9 aspect ratio -->
+          <div class="embed-responsive embed-responsive-16by9">
+            <iframe id="youtube-play" class="embed-responsive-item" src="" allowfullscreen></iframe>
+          </div>
+        </div>
+      </div>
+    </div>
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/2.1.4/jquery.min.js"></script>
     <script src="js/landio.min.js"></script>
+    <script src="js/timeline.js"></script>
   </body>
 </html>
