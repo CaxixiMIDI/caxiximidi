@@ -207,7 +207,6 @@
     inputPlaceholders();
     navMobileCollapse();
     navSearch();
-    htmlVideo();
     scrollToTop();
     donutChart();
     videoModal();

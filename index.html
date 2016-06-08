@@ -4,10 +4,10 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta http-equiv="x-ua-compatible" content="ie=edge">
-    <title>Caxixi Midi</title>
-    <meta name="description" content="" />
-    <meta name="keywords" content="" />
-    <meta name="author" content="" />
+    <title>Caxixi MIDI</title>
+    <meta name="description" content="Las posibilidades técnicas del caxixi, un instrumento de percusión de mano, hacia una interfaz MIDI." />
+    <meta name="keywords" content="caxixi, midi, caxiximidi, music, arduino, shaker, xbee, imu, accelerometer, gyroscope" />
+    <meta name="author" content="Caxixi Team" />
     <link rel="apple-touch-icon" sizes="57x57" href="img/favicon/apple-touch-icon-57x57.png">
     <link rel="apple-touch-icon" sizes="60x60" href="img/favicon/apple-touch-icon-60x60.png">
     <link rel="apple-touch-icon" sizes="72x72" href="img/favicon/apple-touch-icon-72x72.png">
@@ -29,7 +29,6 @@
     <meta name="theme-color" content="#663fb5">
     <link rel="stylesheet" href="css/landio.css">
     <link rel="stylesheet" href="css/timeline.css">
-    <script src="js/plugins/video.js"></script>
     <script src="js/modernizr.js"></script>
     <script>
       (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
@@ -79,14 +78,14 @@
     <!-- Hero Section
     ================================================== -->
 
-    <header class="jumbotron bg-inverse text-xs-center center-vertically" role="banner">
+    <header id="totop" class="jumbotron bg-inverse text-xs-center center-vertically" role="banner">
       <div class="container">
         <h1 class="display-3">Caxixi MIDI</h1>
         <h2 class="m-b-3">Caxixing the <em>right elements</em> to play music.</h2>
-        <a class="btn btn-secondary-outline m-b-1" href="https://github.com/GonzaGonza/caxiximidi" role="button"><span class="icon-github"></span>GitHub</a>
+        <a class="btn btn-secondary-outline m-b-1" target="_blank" href="https://github.com/GonzaGonza/caxiximidi" role="button"><span class="icon-github"></span>GitHub</a>
         <ul class="nav nav-inline social-share">
-          <li class="nav-item"><a class="nav-link" href="https://twitter.com/caxiximidi"><span class="icon-twitter"></span></a></li>
-          <li class="nav-item"><a class="nav-link" href="https://www.facebook.com/caxiximidi/"><span class="icon-facebook"></span></a></li>
+          <li class="nav-item"><a class="nav-link" target="_blank" href="https://twitter.com/caxiximidi"><span class="icon-twitter"></span></a></li>
+          <li class="nav-item"><a class="nav-link" target="_blank" href="https://www.facebook.com/caxiximidi/"><span class="icon-facebook"></span></a></li>
         </ul>
       </div>
     </header>
@@ -149,11 +148,12 @@
       <h3 class="sr-only">Video</h3>
       
       <figure class="has-light-mask">
-         <a id="youtube-trigger" class="icon-play-button" href="#" data-toggle="modal" data-target="#youtubeModal" data-video="http://www.youtube.com/embed/xjS6SftYQaQ">
-           <span class="icon-play3"></span>
-         </a>
-         <img class="img-fluid img-fluid-custom" src="img/video-poster.jpg" alt="Video poster">
-       </figure>
+        <a id="youtube-trigger" class="icon-play-button" href="#" data-toggle="modal" data-target="#youtubeModal"
+        data-video="http://www.youtube.com/embed/EXHSCgvmGbQ">
+          <span class="icon-play3"></span>
+        </a>
+        <img class="img-fluid img-fluid-custom poster-video" src="img/caxixi-video-poster.jpg" alt="Video poster">
+      </figure>
     </section>
     <hr class="invisible">
 
@@ -167,38 +167,38 @@
           <div class="carousel-inner" role="listbox">
             <div class="carousel-item active">
               <blockquote class="blockquote">
-                <img src="img/martinkondra-avatar.png" height="80" width="80" alt="Avatar" class="img-circle">
+                <img src="img/nicolasalberto-avatar.png" height="80" width="80" alt="Nicolas Alberto" class="img-circle">
                 <p class="h3">Este proyecto me permite englobar los conocimientos que adquirí a partir de mi formación como Ingeniero Industrial, con otro mundo que me apasiona, la música.</p>
                 <footer>Nicolas Alberto - Il Ingenieri</footer>
               </blockquote>
             </div>
             <div class="carousel-item">
               <blockquote class="blockquote">
-                <img src="img/face2.jpg" height="80" width="80" alt="Avatar" class="img-circle">
+                <img src="img/martinkondra-avatar.png" height="80" width="80" alt="Martin Kondratsky" class="img-circle">
                 <p class="h3">Mis principales intereses son la música y la linguística. Además de tocar el acordeón, siempre me atrajo la simplicidad de los instrumentos de percusión de mano.</p>
                 <footer>Martin Kondra - l'accordeoniste</footer>
               </blockquote>
             </div>
             <div class="carousel-item">
               <blockquote class="blockquote">
-                <img src="img/gonzalomartinez-avatar.jpg" height="80" width="80" alt="Avatar" class="img-circle">
+                <img src="img/gonzalomartinez-avatar.jpg" height="80" width="80" alt="Gonzalo Martinez" class="img-circle">
                 <p class="h3">Cuando no estoy programando, me gusta cocinar, jugar al fútbol y visitar el mar. Soy uno de los creadores de Popcorn Time.</p>
                 <footer>Gonzalo Martinez - Developer</footer>
               </blockquote>
             </div>
             <div class="carousel-item">
               <blockquote class="blockquote">
-                <img src="img/face4.jpg" height="80" width="80" alt="Avatar" class="img-circle">
-                <p class="h3">Bloum Arriba Abajo Casa Techo Voy</p>
+                <img src="img/emilianopazos-avatar.png" height="80" width="80" alt="Emiliano Pazos" class="img-circle">
+                <p class="h3">Soy economista, docente y músico. CaxixiMidi me permite conjugar mi encanto por la matemática, la lógica, los desafíos y el trabajo en grupo.</p>
                 <footer>Emiliano Pazos - Matematique</footer>
               </blockquote>
             </div>
           </div>
           <ol class="carousel-indicators">
-            <li class="active"><img src="img/face1.jpg" alt="Navigation avatar" data-target="#carousel-testimonials" data-slide-to="0" class="img-fluid img-circle">Nico</li>
-            <li><img src="img/face2.jpg" alt="Gonzalo Martinez Avatar" data-target="#carousel-testimonials" data-slide-to="1" class="img-fluid img-circle">Martin</li>
-            <li><img src="img/gonzalomartinez-avatar.jpg" alt="Gonzalo Martinez Avatar" data-target="#carousel-testimonials" data-slide-to="2" class="img-fluid img-circle">Gonza</li>
-            <li><img src="img/face4.jpg" alt="Navigation avatar" data-target="#carousel-testimonials" data-slide-to="3" class="img-fluid img-circle">Emi</li>
+            <li class="active"><img src="img/nicolasalberto-avatar.png" alt="Nicolas Alberto" data-target="#carousel-testimonials" data-slide-to="0" class="img-fluid img-circle">Nico</li>
+            <li><img src="img/martinkondra-avatar.png" alt="Martin Kondratsky" data-target="#carousel-testimonials" data-slide-to="1" class="img-fluid img-circle">Martin</li>
+            <li><img src="img/gonzalomartinez-avatar.jpg" alt="Gonzalo Martinez" data-target="#carousel-testimonials" data-slide-to="2" class="img-fluid img-circle">Gonza</li>
+            <li><img src="img/emilianopazos-avatar.png" alt="Emiliano Pazos" data-target="#carousel-testimonials" data-slide-to="3" class="img-fluid img-circle">Emi</li>
           </ol>
         </div>
       </div>
@@ -212,10 +212,10 @@
         <h3 class="text-xs-center">Construir tu propio Caxixi Midi es Fácil!</h3>
         <div class="row p-y-3">
           <div class="col-md-5">
-            <p class="wp wp-7">Caxixi MIDI es un proyecto Open Source, lanzado bajo licencia GPL de hardware abierto. Todo el código que utiliza está disponible en nuestra página de GitHub. Si te gusta, podés seguir las instrucciones de los tutoriales y construir tu propio Caxixi. También podés ayudarnos a mejorar el funcionamiento del instrumento o añadirle nuevas características.</p>
+            <p class="wp wp-7">Caxixi MIDI es un proyecto <a hreg="https://es.wikipedia.org/wiki/Software_de_c%C3%B3digo_abierto">Open Source</a>, lanzado bajo licencia <a href="https://es.wikipedia.org/wiki/GNU_General_Public_License">GPL</a> de hardware abierto. Todo el código que utiliza está disponible en nuestra página de <a href="https://github.com/GonzaGonza/caxiximidi">GitHub</a>. Si te gusta, podés seguir las <a href="#instrucciones">instrucciones de los tutoriales</a> y construir tu propio Caxixi. También podés ayudarnos a mejorar el funcionamiento del instrumento o añadirle nuevas características.</p>
           </div>
           <div class="col-md-5 col-md-offset-2 separator-x">
-            <p class="wp wp-8">A posuere donec senectus suspendisse bibendum magna ridiculus a justo orci parturient suspendisse ad rhoncus cursus ut parturient viverra elit aliquam ultrices est sem. Tellus nam ad fermentum ac enim est duis facilisis congue a lacus adipiscing consequat risus consectetur scelerisque integer suspendisse a mus integer elit massa ut.</p>
+            <p class="wp wp-8">Tenemos algunas ideas y mejoras pensadas, así también como proyectos derivados, como <a href="#todo">CCMessages</a> o un ajustador de <a href="#todo">Tempo</a>, pero siempre son bienvenidas <a href="#todo">nuevas propuestas</a> de cómo utilizarlo!</p>
           </div>
         </div>
       </div>
@@ -231,16 +231,16 @@
           <div class="row">
             <div class="col-md-6 p-r-0">
               <figure class="has-light-mask m-b-0 image-effect">
-                <img src="img/caxiximidi-network.png" alt="Caxixi MIDI GitHub Network" class="img-fluid">
+                <img src="img/neverforget.jpg" alt="Caxixi MIDI GitHub Network" class="img-fluid">
               </figure>
             </div>
             <div class="col-md-6 p-l-0">
               <article class="center-block">
-                <span class="label label-info">Featured article</span>
+                <span class="label label-info">Articulo</span>
                 <br>
-                <h5><a href="#">Como hacer tu propio Caxixi Midi <span class="icon-arrow-right"></span></a></h5>
+                <h5><a href="#">Never forget who you are <span class="icon-arrow-right"></span></a></h5>
                 <p class="m-b-0">
-                  <a href="#"><span class="label label-default text-uppercase"><span class="icon-file-text2"></span> Instrucciones</span></a>
+                  <a href="#"><span class="label label-default text-uppercase"><span class="icon-file-text2"></span> Caxixi</span></a>
                   <a href="#"><span class="label label-default text-uppercase"><span class="icon-clock"></span> 22 May 2016</span></a>
                 </p>
               </article>
@@ -249,17 +249,17 @@
           <div class="row">
             <div class="col-md-6 col-md-push-6 p-l-0">
               <figure class="has-light-mask m-b-0 image-effect">
-                <img src="https://images.unsplash.com/photo-1434394673726-e8232a5903b4?q=80&fm=jpg&w=1080&fit=max" alt="Article thumbnail" class="img-fluid">
+                <img src="img/makerspace-orange.jpg" alt="Article thumbnail" class="img-fluid">
               </figure>
             </div>
             <div class="col-md-6 col-md-pull-6 p-r-0">
               <article class="center-block">
-                <span class="label label-info">Featured article</span>
+                <span class="label label-info">Tutorial</span>
                 <br>
-                <h5><a href="#">How bold, emotive imagery can connect with your audience <span class="icon-arrow-right"></span></a></h5>
+                <h5><a href="doc/CaxixiMIDI-InstructableVersionSampler.pdf">Tutoriales (Work in Progress) <span class="icon-arrow-right"></span></a></h5>
                 <p class="m-b-0">
-                  <a href="#"><span class="label label-default text-uppercase"><span class="icon-tag"></span> Design Studio</span></a>
-                  <a href="#"><span class="label label-default text-uppercase"><span class="icon-time"></span> 1 Hour Ago</span></a>
+                  <a href="#"><span class="label label-default text-uppercase"><span class="icon-tag"></span> Instrucciones</span></a>
+                  <a href="#"><span class="label label-default text-uppercase"><span class="icon-time"></span> 1 Jun 2016</span></a>
                 </p>
               </article>
             </div>
@@ -270,8 +270,8 @@
 
   	<section id="cd-timeline" class="cd-container link-fadeinbg">
   		<div class="cd-timeline-block">
-  			<div class="cd-timeline-img cd-picture">
-  				<img src="img/cd-icon-picture.svg" alt="Picture">
+  			<div class="cd-timeline-img cd-switch">
+  				<img src="img/icon-switch.svg" alt="Switch">
   			</div> <!-- cd-timeline-img -->
 
   			<div class="cd-timeline-content">
@@ -282,8 +282,8 @@
   		</div> <!-- cd-timeline-block -->
 
   		<div class="cd-timeline-block">
-  			<div class="cd-timeline-img cd-movie">
-  				<img src="img/cd-icon-movie.svg" alt="Movie">
+  			<div class="cd-timeline-img cd-cogs">
+  				<img src="img/icon-cogs.svg" alt="Cogs">
   			</div> <!-- cd-timeline-img -->
 
   			<div class="cd-timeline-content">
@@ -296,8 +296,8 @@
   		</div> <!-- cd-timeline-block -->
 
   		<div class="cd-timeline-block">
-  			<div class="cd-timeline-img cd-picture">
-  				<img src="img/cd-icon-picture.svg" alt="Picture">
+  			<div class="cd-timeline-img cd-caxixi">
+  				<img src="img/icon-caxixi.svg" alt="Caxixi">
   			</div> <!-- cd-timeline-img -->
 
   			<div class="cd-timeline-content">
@@ -309,8 +309,8 @@
   		</div> <!-- cd-timeline-block -->
 
   		<div class="cd-timeline-block">
-  			<div class="cd-timeline-img cd-location">
-  				<img src="img/cd-icon-location.svg" alt="Location">
+  			<div class="cd-timeline-img cd-lab">
+  				<img src="img/icon-lab.svg" alt="Lab">
   			</div> <!-- cd-timeline-img -->
 
   			<div class="cd-timeline-content">
@@ -322,8 +322,8 @@
   		</div> <!-- cd-timeline-block -->
 
   		<div class="cd-timeline-block">
-  			<div class="cd-timeline-img cd-location">
-  				<img src="img/cd-icon-location.svg" alt="Location">
+  			<div class="cd-timeline-img cd-caxixi">
+  				<img src="img/icon-caxixi.svg" alt="Caxixi">
   			</div> <!-- cd-timeline-img -->
 
   			<div class="cd-timeline-content">
@@ -334,8 +334,8 @@
   		</div> <!-- cd-timeline-block -->
 
   		<div class="cd-timeline-block">
-  			<div class="cd-timeline-img cd-movie">
-  				<img src="img/cd-icon-movie.svg" alt="Movie">
+  			<div class="cd-timeline-img cd-caxixi">
+  				<img src="img/icon-caxixi.svg" alt="Caxixi">
   			</div> <!-- cd-timeline-img -->
 
   			<div class="cd-timeline-content">
@@ -346,8 +346,8 @@
   		</div> <!-- cd-timeline-block -->
       
   		<div class="cd-timeline-block">
-  			<div class="cd-timeline-img cd-movie">
-  				<img src="img/cd-icon-movie.svg" alt="Movie">
+  			<div class="cd-timeline-img cd-group-add">
+  				<img src="img/icon-user-plus.svg" alt="User Plus">
   			</div> <!-- cd-timeline-img -->
 
   			<div class="cd-timeline-content">
@@ -370,8 +370,8 @@
   		</div> <!-- cd-timeline-block -->
       
   		<div class="cd-timeline-block">
-  			<div class="cd-timeline-img cd-movie">
-  				<img src="img/cd-icon-movie.svg" alt="Movie">
+  			<div class="cd-timeline-img cd-caxixi">
+  				<img src="img/icon-caxixi.svg" alt="Caxixi">
   			</div> <!-- cd-timeline-img -->
 
   			<div class="cd-timeline-content">
@@ -382,8 +382,8 @@
   		</div> <!-- cd-timeline-block -->
       
   		<div class="cd-timeline-block">
-  			<div class="cd-timeline-img cd-movie">
-  				<img src="img/cd-icon-movie.svg" alt="Movie">
+  			<div class="cd-timeline-img cd-caxixi">
+  				<img src="img/icon-caxixi.svg" alt="Movie">
   			</div> <!-- cd-timeline-img -->
 
   			<div class="cd-timeline-content">
@@ -395,8 +395,8 @@
   		</div> <!-- cd-timeline-block -->
       
   		<div class="cd-timeline-block">
-  			<div class="cd-timeline-img cd-movie">
-  				<img src="img/cd-icon-movie.svg" alt="Movie">
+  			<div class="cd-timeline-img cd-caxixi">
+  				<img src="img/icon-caxixi.svg" alt="Movie">
   			</div> <!-- cd-timeline-img -->
 
   			<div class="cd-timeline-content">
@@ -511,7 +511,7 @@
       </div>
     </footer>
     
-    <!-- video modal -->
+    
     <div class="modal fade" id="youtubeModal" tabindex="-1" role="dialog" aria-labelledby="youtubeModal" aria-hidden="true">
       <div class="modal-dialog modal-video" role="document">
         <div class="modal-content">
@@ -522,6 +522,9 @@
         </div>
       </div>
     </div>
+    
+    
+    
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/2.1.4/jquery.min.js"></script>
     <script src="js/landio.min.js"></script>
     <script src="js/timeline.js"></script>

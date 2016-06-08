@@ -115,6 +115,26 @@ Modules - reusable parts of our design
 		background: $color-5;
 	}
 
+	&.cd-switch {
+		background: $color-4;
+	}
+  
+	&.cd-caxixi {
+		background: $color-6;
+	}
+  
+	&.cd-cogs {
+		background: $color-7;
+	}
+  
+	&.cd-lab {
+		background: $color-8;
+	}
+  
+	&.cd-group-add {
+		background: $color-9;
+	}
+
 	@include MQ(L) {
 		width: 60px;
 		height: 60px;
