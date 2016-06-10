@@ -119,6 +119,28 @@
 		"outputPathIsSetByUser": 0,
 		"processed": 0
 		},
+	"\/img\/Caxixi-13.png": {
+		"fileType": 32768,
+		"ignore": 0,
+		"ignoreWasSetByUser": 0,
+		"initialSize": 25851,
+		"inputAbbreviatedPath": "\/img\/Caxixi-13.png",
+		"outputAbbreviatedPath": "\/img\/Caxixi-13.png",
+		"outputPathIsOutsideProject": 0,
+		"outputPathIsSetByUser": 0,
+		"processed": 0
+		},
+	"\/img\/Caxixi-14.png": {
+		"fileType": 32768,
+		"ignore": 0,
+		"ignoreWasSetByUser": 0,
+		"initialSize": 19255,
+		"inputAbbreviatedPath": "\/img\/Caxixi-14.png",
+		"outputAbbreviatedPath": "\/img\/Caxixi-14.png",
+		"outputPathIsOutsideProject": 0,
+		"outputPathIsSetByUser": 0,
+		"processed": 0
+		},
 	"\/img\/caxixi-video-poster.jpg": {
 		"fileType": 16384,
 		"ignore": 0,
