@@ -65,11 +65,10 @@ void setup()
   pinMode(SAMPLER_BUTTON_RECORD_PIN, INPUT);
   pinMode(SAMPLER_BUTTON_CLEAR_PIN, INPUT);
   pinMode(OCTAVE_UP_LED_RED_PIN, OUTPUT);
-  pinMode(OCTAVE_UP_LED_BLUE_PIN, OUTPUT);
   pinMode(OCTAVE_UP_LED_GREEN_PIN, OUTPUT);
   pinMode(OCTAVE_DOWN_LED_RED_PIN, OUTPUT);
-  pinMode(OCTAVE_DOWN_LED_BLUE_PIN, OUTPUT);
   pinMode(OCTAVE_DOWN_LED_GREEN_PIN, OUTPUT);
+  digitalWrite(RECORD_LED_PIN, HIGH);
   analogWrite(OCTAVE_DOWN_LED_RED_PIN,255);
   analogWrite(OCTAVE_DOWN_LED_GREEN_PIN, 255);
   analogWrite(OCTAVE_UP_LED_RED_PIN, 255);
@@ -95,7 +94,7 @@ void setup()
 
 void loop()
 {
-  time = millis()-(t0 + t1 + reset);
+  time = millis() - reset;
   setReset();
   PlayBuffer();
   showLeds();
@@ -180,7 +179,7 @@ void SendNoteOn(int note)
   if(record){
     FirstNote = true;
     setT0();
-    time = millis()-(t0 + t1 + reset);  //Esto es para que a la primera nota la guarde con time == 0
+    time = millis() - reset;    
     Buffer sample = {note, layer, 1, time};
     samples[bufferI] = sample;
   }
@@ -213,7 +212,7 @@ void setReset(){
   int a = t1 - time;
   if(t0 != 0 && t1!=0 && a<=0){
     bubbleSort(samples,bufferI);
-    reset = millis()-t0-t1;
+    reset = millis();    
     bufferJ = 0;
   }
 }
@@ -222,6 +221,7 @@ void setT0()//A esta fc la llama ButtonRecord()
 {
   if (record && !isSetT0 && FirstNote){
     t0 = millis();
+    reset= millis();
   }
   if (record && !isSetT0&& FirstNote){
     isSetT0 = true;
@@ -232,19 +232,22 @@ void setT1(){
   if(!record && !isSetT1 && t0 != 0){
     t1 = millis() - t0;
     isSetT1 = true;
+    reset= millis();
     play = true;
   }
 }
 
 void PlayBuffer() {
+  int coef;
+  coef = 1; //This variable is intended for a future implementation of a potentiometer that allow tempo changes
   if(play){
-    if(samples[bufferJ].time-time<0 && samples[bufferJ].time-time>-100){//Esto es un hardcodeo (el -100), corregirlo mirando el reloj en la V2, o dejarlo...
+    if(samples[bufferJ].time*coef/100-time<0 && samples[bufferJ].time*coef/100-time>-100){//Esto es un hardcodeo (el -100), corregirlo mirando el reloj en la V2, o dejarlo..
       if(samples[bufferJ].encendido){
         MIDI.sendNoteOn(samples[bufferJ].note,127,MIDI_CHANNEL);
       }else{
         MIDI.sendNoteOff(samples[bufferJ].note,127,MIDI_CHANNEL);
       }
-      bufferJ++; //J se reinicia cuando da la vuelta, en la fc setReset 
+      bufferJ++; //J se reinicia cuando da la vuelta, en la fc setReset
     }
   }
 }
@@ -366,10 +369,8 @@ switch(currentOctave){
 void TurnOffAll(){//Apaga todos los leds
   analogWrite(OCTAVE_UP_LED_RED_PIN,255);
   analogWrite(OCTAVE_UP_LED_GREEN_PIN,255);
-  analogWrite(OCTAVE_UP_LED_BLUE_PIN,255);
   analogWrite(OCTAVE_DOWN_LED_RED_PIN,255);
   analogWrite(OCTAVE_DOWN_LED_GREEN_PIN,255);
-  analogWrite(OCTAVE_DOWN_LED_BLUE_PIN,255);
 }
 
 
