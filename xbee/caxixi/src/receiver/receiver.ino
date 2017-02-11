@@ -299,6 +299,9 @@ void OctaveUp()
   SendNoteOff(cxLeftBackwardNote);
   SendNoteOff(cxLeftHitNote);
   currentOctave = currentOctave + 1;
+  if (currentOctave>6) {
+    currentOctave = -3;
+  }
 }
 
 void OctaveDown()
@@ -310,6 +313,9 @@ void OctaveDown()
   SendNoteOff(cxLeftBackwardNote);
   SendNoteOff(cxLeftHitNote);
   currentOctave = currentOctave - 1;
+  if (currentOctave<-3) {
+    currentOctave = 7;
+  }
 }
 
 void showLeds(){
