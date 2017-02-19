@@ -5,6 +5,7 @@
 #include <midi_Message.h>
 #include <midi_Namespace.h>
 #include <midi_Settings.h>
+
 struct MyMidiSettings : public midi::DefaultSettings {
   //static const bool UseRunningStatus = false; // Messes with my old equipment!
   static const long DefaultSettings::BaudRate = 9600;
@@ -13,7 +14,8 @@ MIDI_CREATE_CUSTOM_INSTANCE(HardwareSerial, Serial, MIDI, MyMidiSettings);
 
 #include "CxCircularBuffer.h"
 #include <SoftwareSerial.h>
-SoftwareSerial XBee(2, 3); // Arduino RX, TX (XBee Dout, Din)
+SoftwareSerial XBee(2, 3); // Arduino RX, TX (XBee Dout, Din) For UNO
+//SoftwareSerial XBee(10, 11); // Arduino RX, TX (XBee Dout, Din) For MEGA
 
 boolean midiMode = false;
 
@@ -22,6 +24,8 @@ int index;
 boolean started = false;
 boolean ended = false;
 int inInt;
+int CH;
+int NUM;
 
 int cxRightForwardNote = CAXIXI_RIGHT_NOTE_FORWARD;
 int cxRightBackwardNote = CAXIXI_RIGHT_NOTE_BACKWARD;
@@ -121,42 +125,55 @@ void loop()
       // Convert the string to an integer
       inInt = atoi(inData);
       // Use the value
-      // Serial.println(inInt);
-    if (inInt == CAXIXI_SAMPLER_CLEAR){
-      Clear();
-    } else if (inInt == CAXIXI_RECORD_START){
-      RecordStart();
-      } else if (inInt == CAXIXI_RECORD_STOP){
-      RecordStop();
-      } else if (inInt == CAXIXI_OCTAVE_UP){
-      OctaveUp();
-      } else if (inInt == CAXIXI_OCTAVE_DOWN){
-      OctaveDown();
-      } else if (inInt == CAXIXI_RIGHT_FORWARD_NOTEON){
-        SendNoteOn(cxRightForwardNote);
-      } else if (inInt == CAXIXI_RIGHT_FORWARD_NOTEOFF){
-        SendNoteOff(cxRightForwardNote);
-      } else if (inInt == CAXIXI_RIGHT_BACKWARD_NOTEON){
-        SendNoteOn(cxRightBackwardNote);
-      } else if (inInt == CAXIXI_RIGHT_BACKWARD_NOTEOFF){ 
-        SendNoteOff(cxRightBackwardNote);
-      } else if (inInt == CAXIXI_RIGHT_HIT_NOTEON){ 
-        SendNoteOn(cxRightHitNote);
-      } else if (inInt == CAXIXI_RIGHT_HIT_NOTEOFF){  
-        SendNoteOff(cxRightHitNote);
-      } else if (inInt == CAXIXI_LEFT_FORWARD_NOTEON){
-        SendNoteOn(cxLeftForwardNote);
-      } else if (inInt == CAXIXI_LEFT_FORWARD_NOTEOFF){
-        SendNoteOff(cxLeftForwardNote);
-      } else if (inInt == CAXIXI_LEFT_BACKWARD_NOTEON){ 
-        SendNoteOn(cxLeftBackwardNote);
-      } else if (inInt == CAXIXI_LEFT_BACKWARD_NOTEOFF){  
-        SendNoteOff(cxLeftBackwardNote);
-      } else if (inInt == CAXIXI_LEFT_HIT_NOTEON){  
-        SendNoteOn(cxLeftHitNote);
-      } else if (inInt == CAXIXI_LEFT_HIT_NOTEOFF){ 
-        SendNoteOff(cxLeftHitNote);
+      //Serial.println(inInt);
+      if (inInt>999) {  //It means that its a CCMessagge
+        SplitCCM(inInt);
+        sendMIDIccm(CH, NUM);
       }
+      else {
+        if (inInt == 600) {
+          SendNoteOn(66);
+        }
+        else if (inInt == 601) {
+          SendNoteOff(66);
+        }
+        else if (inInt == CAXIXI_SAMPLER_CLEAR) {
+          Clear();
+        } else if (inInt == CAXIXI_RECORD_START){
+          RecordStart();
+        } else if (inInt == CAXIXI_RECORD_STOP){
+          RecordStop();
+        } else if (inInt == CAXIXI_OCTAVE_UP){
+          OctaveUp();
+        } else if (inInt == CAXIXI_OCTAVE_DOWN){
+          OctaveDown();
+        } else if (inInt == CAXIXI_RIGHT_FORWARD_NOTEON){
+          SendNoteOn(cxRightForwardNote);
+        } else if (inInt == CAXIXI_RIGHT_FORWARD_NOTEOFF){
+          SendNoteOff(cxRightForwardNote);
+        } else if (inInt == CAXIXI_RIGHT_BACKWARD_NOTEON){
+          SendNoteOn(cxRightBackwardNote);
+        } else if (inInt == CAXIXI_RIGHT_BACKWARD_NOTEOFF){ 
+          SendNoteOff(cxRightBackwardNote);
+        } else if (inInt == CAXIXI_RIGHT_HIT_NOTEON){ 
+          SendNoteOn(cxRightHitNote);
+        } else if (inInt == CAXIXI_RIGHT_HIT_NOTEOFF){  
+          SendNoteOff(cxRightHitNote);
+        } else if (inInt == CAXIXI_LEFT_FORWARD_NOTEON){
+          SendNoteOn(cxLeftForwardNote);
+        } else if (inInt == CAXIXI_LEFT_FORWARD_NOTEOFF){
+          SendNoteOff(cxLeftForwardNote);
+        } else if (inInt == CAXIXI_LEFT_BACKWARD_NOTEON){ 
+          SendNoteOn(cxLeftBackwardNote);
+        } else if (inInt == CAXIXI_LEFT_BACKWARD_NOTEOFF){  
+          SendNoteOff(cxLeftBackwardNote);
+        } else if (inInt == CAXIXI_LEFT_HIT_NOTEON){  
+          SendNoteOn(cxLeftHitNote);
+        } else if (inInt == CAXIXI_LEFT_HIT_NOTEOFF){ 
+          SendNoteOff(cxLeftHitNote);
+        }
+      }
+      
       // Get ready for the next time
       started = false;
       ended = false;
@@ -390,4 +407,13 @@ void TurnOffAll(){//Apaga todos los leds
   analogWrite(OCTAVE_UP_LED_GREEN_PIN,255);
   analogWrite(OCTAVE_DOWN_LED_RED_PIN,255);
   analogWrite(OCTAVE_DOWN_LED_GREEN_PIN,255);
+}
+
+void SplitCCM(int inInt){
+    CH = inInt/1000;
+    NUM = inInt - CH*1000;
+}
+
+void sendMIDIccm(int CH,int NUM){
+    MIDI.sendControlChange(CH, NUM, MIDI_CHANNEL);
 }
