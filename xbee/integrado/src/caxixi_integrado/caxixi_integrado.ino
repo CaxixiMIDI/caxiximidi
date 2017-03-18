@@ -51,13 +51,20 @@ int lastRecordButtonState = 0;  // previous state of the button
 
 // 1.2 Octavator
 int octaveUpButtonLastState  = 0;
+long millis_held;    // How long the button was held (milliseconds)
+long secs_held;      // How long the button was held (seconds)
+long prev_secs_held; // How long the button was held in the previous check
+byte previous = LOW;
+unsigned long firstTime; // how long since the button was first pressed
+int longPressThreshold = 3000; //when a button press is considered long
+
 int lastDownState = 0;
 int octaveUpButtonState = 0;  // variable for reading the pushbutton status
 int octaveDownButtonState = 0;
 int currentOctave = 0;
 
 // 1.3 CCMessages
-bool wantCCM = true;
+bool wantCCM = false;
 bool CCMbufferReady = false;
 CxCircularBuffer GyroXBuffer(BUFFER_SIZE);
 CxCircularBuffer GyroYBuffer(BUFFER_SIZE);
@@ -127,8 +134,8 @@ void loop() {
 }
 
 void runCaxixi() {
-    //ButtonRecord();
-    //ButtonOctaveUp();
+    ButtonRecord();
+    ButtonOctaveUp();
     currentAccelX = accelXBuffer.getPreviousElement(1);
     currentAccelY = accelYBuffer.getPreviousElement(1);
     setSlopeStill();
@@ -321,9 +328,22 @@ void ButtonOctaveUp() {
   octaveUpButtonState = digitalRead(OCTAVE_UP_BUTTON_PIN);
   if (octaveUpButtonState != octaveUpButtonLastState) {
     if (octaveUpButtonState == HIGH){
-      currentOctave = currentOctave+1; 
-      SendOctaveUp();
+      //Serial.print("\nButton pressed");
+      firstTime = millis();
+      if (!wantCCM) {
+        currentOctave = currentOctave+1; 
+        SendOctaveUp();
+        //Serial.print("SendOctaveUp");
+      }
     }
+    millis_held = (millis() - firstTime);
+    if (octaveUpButtonState == LOW && millis_held > longPressThreshold) {
+        //Serial.print("\nChange wantCCM");
+        //Serial.print(wantCCM);
+        wantCCM = !wantCCM;
+        currentOctave = currentOctave-1; 
+        SendOctaveDown(); //Revisar, para compensar el octaveUp indeseado del if anterior
+      }      
     octaveUpButtonLastState = octaveUpButtonState;
   }
 }
@@ -499,6 +519,7 @@ void ProcessCCM() {
 }
 
 void runCCM() {
+  ButtonOctaveUp();
   ccmNotes();
   areRolling();
   ProcessCCM();
