@@ -56,7 +56,7 @@ long secs_held;      // How long the button was held (seconds)
 long prev_secs_held; // How long the button was held in the previous check
 byte previous = LOW;
 unsigned long firstTime; // how long since the button was first pressed
-int longPressThreshold = 3000; //when a button press is considered long
+int longPressThreshold = 2000; //when a button press is considered long in millis
 
 int lastDownState = 0;
 int octaveUpButtonState = 0;  // variable for reading the pushbutton status
@@ -121,7 +121,7 @@ void loop() {
   if(wantCCM){
     setCircularBufferCCM();
     if(CCMbufferReady || isCCMBufferReady()){
-    runCCM();
+      runCCM();
     }
   }
   else {
@@ -328,21 +328,19 @@ void ButtonOctaveUp() {
   octaveUpButtonState = digitalRead(OCTAVE_UP_BUTTON_PIN);
   if (octaveUpButtonState != octaveUpButtonLastState) {
     if (octaveUpButtonState == HIGH){
-      //Serial.print("\nButton pressed");
       firstTime = millis();
       if (!wantCCM) {
-        currentOctave = currentOctave+1; 
+        //currentOctave = currentOctave+1; 
         SendOctaveUp();
-        //Serial.print("SendOctaveUp");
       }
     }
     millis_held = (millis() - firstTime);
     if (octaveUpButtonState == LOW && millis_held > longPressThreshold) {
         //Serial.print("\nChange wantCCM");
-        //Serial.print(wantCCM);
-        wantCCM = !wantCCM;
-        currentOctave = currentOctave-1; 
+        if (!wantCCM) {
         SendOctaveDown(); //Revisar, para compensar el octaveUp indeseado del if anterior
+        }
+        wantCCM = !wantCCM;
       }      
     octaveUpButtonLastState = octaveUpButtonState;
   }
