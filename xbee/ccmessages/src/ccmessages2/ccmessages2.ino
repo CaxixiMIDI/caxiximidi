@@ -193,7 +193,7 @@ void processCCMY() {
   int controlvalueY;
   int y;
   controlvalueY = GyroYBuffer.getPreviousElement(1);
-  y = map(controlvalueY, 25, -25, 0, 127); 
+  y = map(controlvalueY, -25, 25, 0, 127); 
   MIDI.sendControlChange(16,y,midiChannel);
   //delay(2);
 }
@@ -202,7 +202,7 @@ void processCCMZ() {
   int controlvalueZ;
   int z;
   controlvalueZ = GyroZBuffer.getPreviousElement(1);
-  z = map(controlvalueZ, 25, -25, 0, 127); 
+  z = map(controlvalueZ, -25, 25, 0, 127); 
   MIDI.sendControlChange(17,z,midiChannel);
   //delay(2);
 }
