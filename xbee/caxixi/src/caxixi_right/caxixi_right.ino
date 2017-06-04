@@ -76,6 +76,8 @@ void setup() {
   Wire.begin();
   accelXBuffer.clear();
   accelYBuffer.clear();
+  pinMode(OCTAVE_UP_BUTTON_PIN, INPUT);
+  pinMode(SAMPLER_BUTTON_RECORD_PIN, INPUT);
   delay(5);
   my3IMU.init();
   my3IMU.acc.setFullResBit(true);

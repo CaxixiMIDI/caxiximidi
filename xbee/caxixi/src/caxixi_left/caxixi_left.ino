@@ -76,6 +76,8 @@ void setup() {
 	Wire.begin();
 	accelXBuffer.clear();
 	accelYBuffer.clear();
+  pinMode(OCTAVE_DOWN_BUTTON_PIN, INPUT);
+  pinMode(SAMPLER_BUTTON_CLEAR_PIN, INPUT);
 	delay(5);
 	my3IMU.init();
 	my3IMU.acc.setFullResBit(true);
@@ -93,7 +95,7 @@ void loop() {
 	SensorRead[SENSOR_ACCEL_Z] = (int)v[2];
 	setCircularBuffer();
 	if(bufferReady || isBufferReady()){
-	    ButtonClear();
+	  ButtonClear();
 		ButtonOctaveDown();
 		currentAccelX = accelXBuffer.getPreviousElement(1);
 		currentAccelY = accelYBuffer.getPreviousElement(1);
